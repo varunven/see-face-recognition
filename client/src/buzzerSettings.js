@@ -1,69 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function BuzzerSettings() {
-  const [value1, setValue1] = useState(100);
-  const [value2, setValue2] = useState(100);
-  const [value3, setValue3] = useState(100);
-  const [isSwitchOn, setSwitchOn] = useState(false);
-
-  const handleSlider1Change = (event) => {
-    setValue1(parseInt(event.target.value));
-  };
-
-  const handleSlider2Change = (event) => {
-    setValue2(parseInt(event.target.value));
-  };
-
-  const handleSwitchChange = () => {
-    setSwitchOn(!isSwitchOn);
-  };
-
-  const handleSubmit = () => {
-    // Handle form submission here
-    console.log('Form submitted!');
-    console.log('Slider 1:', value1);
-    console.log('Slider 2:', value2);
-    console.log('Switch:', isSwitchOn);
-  };
+    const [ObjectDetection, setObjectDetection] = useState(100);
+    const [SidewalkDetection, setSidewalkDetection] = useState(100);
+    const [isHapticFeedbackToggled, setHapticFeedbackToggle] = useState(
+        localStorage.getItem('HapticFeedbackToggled') === 'true');
     
-  return (
-    <div>
-      <div>
-        <label htmlFor="slider1">Haptic Feedback Buzzers for Object Detection</label>
-        <input
-          type="range"
-          id="slider1"
-          min={0}
-          max={100}
-          value={value1}
-          onChange={handleSlider1Change}
-        />
-        <span>{value1}</span>
-      </div>
-      <div>
-      <label htmlFor="slider2">Haptic Feedback Buzzers for Sidewalk Tracking</label>
-        <input
-          type="range"
-          id="slider2"
-          min={0}
-          max={100}
-          value={value2}
-          onChange={handleSlider2Change}
-        />
-        <span>{value2}</span>
-      </div>
-      <div>
-        <button
-          className={`switch ${isSwitchOn ? 'on' : 'off'}`}
-          onClick={handleSwitchChange}
-        >
-          <span className="knob"></span>
-        </button>
-        <span>{isSwitchOn ? 'Yes' : 'No'}</span>
-      </div>
-    <button onClick={handleSubmit}>Update Buzzer Settings</button>
-    </div>
-  );
+    useEffect(() => {
+        // Retrieve the stored value from local storage on component mount
+        const volume = localStorage.getItem('SidewalkDetection');
+        if (volume) {
+            setSidewalkDetection(parseInt(volume));
+        }
+        const minDistStoredValue = localStorage.getItem('ObjectDetection');
+        if (minDistStoredValue) {
+            setObjectDetection(parseInt(minDistStoredValue));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('HapticFeedbackToggled', isHapticFeedbackToggled);
+      }, [isHapticFeedbackToggled]);
+    
+    const handleSidewalkTrackingChange = (event) => {
+        const value = parseInt(event.target.value);
+        setSidewalkDetection(value);
+        // Store the value in local storage when it changes
+        localStorage.setItem('SidewalkDetection', value.toString());
+    };
+
+    const handleObjectDetectionChange = (event) => {
+        const value = parseInt(event.target.value);
+        setObjectDetection(value);
+        // Store the value in local storage when it changes
+        localStorage.setItem('ObjectDetection', value.toString());
+    };
+
+    const handlehapticFeedbackToggle = () => {
+        setHapticFeedbackToggle((isHapticFeedbackToggled) => !isHapticFeedbackToggled);
+    };
+
+    const handleSubmit = () => {
+        console.log('Form submitted!');
+    };
+    
+    return (
+        <div>
+        <div>
+            <label htmlFor="ObjectDetection">Haptic Feedback Buzzers for Sidewalk Tracking</label>
+            <input
+                type="range"
+                id="ObjectDetection"
+                min={0}
+                max={100}
+                value={ObjectDetection}
+                onChange={handleObjectDetectionChange}
+            />
+            <span>{ObjectDetection}</span>
+            </div>
+            <div>
+            <label htmlFor="SidewalkTracking">Haptic Feedback Buzzers for Object Detection</label>
+            <input
+                type="range"
+                id="SidewalkTracking"
+                min={0}
+                max={100}
+                value={SidewalkDetection}
+                onChange={handleSidewalkTrackingChange}
+            />
+            <span>{SidewalkDetection}</span>
+            </div>
+            <div className="hapticFeedbackToggle-container">
+            <div className="text-container">
+            <p>{isHapticFeedbackToggled ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
+            </div>
+            <label className="switch">
+            <input type="checkbox" checked={isHapticFeedbackToggled} onChange={handlehapticFeedbackToggle} />
+            <span className="slider"></span>
+            </label>
+        </div>
+        <button onClick={handleSubmit}>Update Buzzer Settings</button>
+        </div>
+    );
 }
 
 export default BuzzerSettings;

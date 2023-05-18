@@ -1,28 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import face_images from './face_images'
 
-function ChangeFaces(user_id) {
-  const [images, setImages] = useState([]);
+const ChangeFaces = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [newFirstName, setFirstName] = useState("");
+  const [newLastName, setLastName] = useState("");
+  const images = face_images // normally would use api to get images
 
-  const handleButtonClick = async () => {
-    try {
-      const response = await fetch('/getfaces/{user_id}/images'); // Replace with the appropriate API endpoint to fetch the image filenames
-      const data = await response.json();
-      setImages(data.images);
-    } catch (error) {
-      console.error('Error fetching images:', error);
-    }
+  // person name is name of file separated by _ --> "jason_statham" --> Jason Statham
+  const nameWithoutExtension = images[currentIndex].split(".")[0];
+  const newNameWithoutExtension = nameWithoutExtension.replace('/static/media/', '');
+  const [firstName, lastName] = newNameWithoutExtension.split("_");
+
+  // Move to prev/next photo
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
   };
 
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+  };
+
+  // When button is pressed do action
+  const handleFaceClick = () => {
+    setShowOverlay(true);
+  };
+
+  const handleSubmit = (firstname, lastname) => {
+    console.log(images[currentIndex])
+    var newfilename = firstname + "_" + lastname + ".png"
+    // rename_file(newfilename)
+    setShowOverlay(false);
+  };
+
+  useEffect(() => {
+    // Retrieve the stored value from local storage on component mount
+    const name = localStorage.getItem(currentIndex);
+    if (name) {
+      setFirstName(parseInt(name.split(" ")[0]));
+      setLastName(parseInt(name.split(" ")[1]));
+    }
+  }, []);
+
   return (
-    <div>
-      <button onClick={handleButtonClick}>Load Images</button>
-      <div className="gallery">
-        {images.map((image, index) => (
-          <img key={index} src={image} alt={`Image ${index}`} />
-        ))}
+    <div className="gallery">
+      <div className="image-container">
+        <button className="left-gallery-button" onClick={handlePrev}>
+          &lt; {/* Left arrow symbol */}
+        </button>
+        <img src={images[currentIndex]} alt={`Photo ${currentIndex + 1}`} className="scaled-image" />
+        <button className="face-button" onClick={handleFaceClick}>
+          Would you like to assign a name to this person?
+        </button>
+        {showOverlay && (
+        <div className="overlay">
+          <div className="overlay-content">
+              <h2>This person is {firstName} {lastName}. What should they be renamed?</h2>
+            <input
+              type="text"
+              placeholder={firstName}
+              value={newFirstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder={lastName}
+              value={newLastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <button onClick={() => handleSubmit(newFirstName, newLastName)}>Submit</button>
+          </div>
+        </div>
+      )}
+
+        <button className="right-gallery-button" onClick={handleNext}>
+          &gt; {/* Right arrow symbol */}
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default ChangeFaces;
