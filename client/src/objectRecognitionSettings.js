@@ -1,67 +1,78 @@
 import React, { useState, useEffect } from 'react';
 
 function ObjectRecognitionSettings() {
-    const [VolumeControl, setVolumeControl] = useState(100);
-    const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(5);
-    const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
+  const [VolumeControl, setVolumeControl] = useState(100);
+  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(5);
+  const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
     localStorage.getItem('ObjectRecognitionAudioToggled') === 'true');
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [rowStates, setRowStates] = useState(Array(10).fill(false));
-    const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
-    const [selectedOption, setSelectedOption] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [rowStates, setRowStates] = useState(Array(1));
+  const [voiceGender, setVoiceGender] = useState('');
+  const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
 
-    const toggleMenu = () => {
-        setMenuOpen(!menuOpen);
-    };
-    
-    const toggleRowState = (index) => {
-        const newRowStates = [...rowStates];
-        newRowStates[index] = !newRowStates[index];
-        setRowStates(newRowStates);
-    };
+  // Volume and Distance Slider Controls
+  useEffect(() => {
+    const volume = localStorage.getItem('VolumeControl');
+    if (volume) {
+      setVolumeControl(parseInt(volume));
+    }
+    const minDistStoredValue = localStorage.getItem('MinimumDistanceForAudio');
+    if (minDistStoredValue) {
+      setMinimumDistanceForAudio(parseInt(minDistStoredValue));
+    }
+  }, []);
 
-    useEffect(() => {
-        // Retrieve the stored value from local storage on component mount
-        const volume = localStorage.getItem('VolumeControl');
-        if (volume) {
-          setVolumeControl(parseInt(volume));
-        }
-        const minDistStoredValue = localStorage.getItem('MinimumDistanceForAudio');
-        if (minDistStoredValue) {
-          setMinimumDistanceForAudio(parseInt(minDistStoredValue));
-        }
-    }, []);
+  // Object Recognition Audio 
+  useEffect(() => {
+    localStorage.setItem('ObjectRecognitionAudioToggled', isObjectRecognitionAudioToggled);
+    const gender = localStorage.getItem('VoiceGender');
+    if (gender) {
+      setVoiceGender(gender);
+    }
+  }, [isObjectRecognitionAudioToggled]);
+  
+  // Object Recognition Menu
+  useEffect(() => {
+    const storedRowStates = localStorage.getItem('rowStates');
+    if (storedRowStates) {
+      setRowStates(JSON.parse(storedRowStates));
+    }
+  }, []);
 
-    useEffect(() => {
-        localStorage.setItem('ObjectRecognitionAudioToggled', isObjectRecognitionAudioToggled);
-      }, [isObjectRecognitionAudioToggled]);
-    
-    const handleVolumeControl = (event) => {
-        const value = parseInt(event.target.value);
-        setVolumeControl(value);
-        // Store the value in local storage when it changes
-        localStorage.setItem('VolumeControl', value.toString());
-    };
+  const handleVolumeControl = (event) => {
+      const value = parseInt(event.target.value);
+      setVolumeControl(value);
+      // Store the value in local storage when it changes
+      localStorage.setItem('VolumeControl', value.toString());
+  };
 
-    const handleMinimumDistanceForAudio = (event) => {
-        const value = parseInt(event.target.value);
-        setMinimumDistanceForAudio(value);
-        // Store the value in local storage when it changes
-        localStorage.setItem('MinimumDistanceForAudio', value.toString());
-    };
+  const handleMinimumDistanceForAudio = (event) => {
+      const value = parseInt(event.target.value);
+      setMinimumDistanceForAudio(value);
+      // Store the value in local storage when it changes
+      localStorage.setItem('MinimumDistanceForAudio', value.toString());
+  };
 
-    const handleobjectRecognitionAudioToggled = () => {
-        setisObjectRecognitionAudioToggled((isObjectRecognitionAudioToggled) => !isObjectRecognitionAudioToggled);
-    };
-    
-    const handleSubmit = () => {
-        // Handle form submission here
-        console.log('Form submitted!');
-    };
-    
-    const handleOptionClick = (option) => {
-        setSelectedOption(option);
-    };
+  const handleobjectRecognitionAudioToggled = () => {
+      setisObjectRecognitionAudioToggled((isObjectRecognitionAudioToggled) => !isObjectRecognitionAudioToggled);
+  };
+
+  const handleVoiceGenderSelect = (option) => {
+    setVoiceGender(option);
+    // Store the value in local storage when it changes
+    localStorage.setItem('VoiceGender', option);
+  };
+
+  const toggleObjectRecognitionMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const toggleObjectRecognitionRowState = (index) => {
+    const newRowStates = [...rowStates];
+    newRowStates[index] = !newRowStates[index];
+    setRowStates(newRowStates);
+    localStorage.setItem('rowStates', JSON.stringify(newRowStates));
+  };
     
   return (
     <div>
@@ -102,17 +113,17 @@ function ObjectRecognitionSettings() {
     </div>
           
     <div>
-        <p>Current Audio Voice: {selectedOption}</p>
+        <p>Current Audio Voice: {voiceGender}</p>
       <div className="switch-container">
         <div
-          className={`option ${selectedOption === 'Male' ? 'active' : ''}`}
-          onClick={() => handleOptionClick('Male')}
+          className={`option ${voiceGender === 'Male' ? 'active' : ''}`}
+          onClick={() => handleVoiceGenderSelect('Male')}
         >
           Male Voice
         </div>
         <div
-          className={`option ${selectedOption === 'Female' ? 'active' : ''}`}
-          onClick={() => handleOptionClick('Female')}
+          className={`option ${voiceGender === 'Female' ? 'active' : ''}`}
+          onClick={() => handleVoiceGenderSelect('Female')}
         >
           Female Voice
         </div>
@@ -120,12 +131,12 @@ function ObjectRecognitionSettings() {
     </div>
           
     <div className="App">
-        <button onClick={toggleMenu}>Objects to Recognize</button>
+        <button onClick={toggleObjectRecognitionMenu}>Objects to Recognize</button>
         {menuOpen && (
         <div className="popup-container">
             <div className="menu-content">
             {[...Array(recognizable_objects.length).keys()].map((index) => (
-                <div key={index} className="row" onClick={() => toggleRowState(index)}>
+                <div key={index} className="row" onClick={() => toggleObjectRecognitionRowState(index)}>
                 <span className="label">Recognize {recognizable_objects[index]}?</span>
                 <div className={`box ${rowStates[index] ? 'green' : 'white'}`} />
                 </div>
@@ -134,7 +145,6 @@ function ObjectRecognitionSettings() {
         </div>
         )}
     </div>
-    <button onClick={handleSubmit}>Update Object Recognition Settings</button>
     </div>
   );
 }

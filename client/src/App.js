@@ -7,7 +7,14 @@ import BuzzerSettings from './buzzerSettings';
 import ObjectRecognitionSettings from './objectRecognitionSettings';
 
 function Home() {
-  return <h1>Welcome to the Home Page</h1>;
+  return (
+    <div
+      className="text-logo-container"
+      style={{ width: `${373}px`, height: `${360}px` }}
+    >
+      <div className="white-text">Welcome to S.E.E.</div>
+    </div>
+  );
 }
 
 function App() {

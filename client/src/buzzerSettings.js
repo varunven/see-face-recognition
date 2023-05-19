@@ -39,10 +39,6 @@ function BuzzerSettings() {
     const handlehapticFeedbackToggle = () => {
         setHapticFeedbackToggle((isHapticFeedbackToggled) => !isHapticFeedbackToggled);
     };
-
-    const handleSubmit = () => {
-        console.log('Form submitted!');
-    };
     
     return (
         <div>
@@ -79,7 +75,6 @@ function BuzzerSettings() {
             <span className="slider"></span>
             </label>
         </div>
-        <button onClick={handleSubmit}>Update Buzzer Settings</button>
         </div>
     );
 }

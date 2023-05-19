@@ -260,3 +260,18 @@ input:checked + .slider:before {
   background-color: #2196f3;
   color: #fff;
 }
+
+.text-logo-container {
+  background-image: url('./logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 20px;
+}
+
+.white-text{
+  color: #fff;
+  font-size: 200%;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
