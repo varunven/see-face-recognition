@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import socketIOClient from 'socket.io-client';
 import face_images from './face_images'
 
-const ChangeFaces = () => {
-  const socket = socketIOClient('http://localhost:3001');
+const ChangeFaces = ({socket}) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
@@ -34,8 +32,11 @@ const ChangeFaces = () => {
     console.log(images[currentIndex])
     const origFileName = firstName + "_" + lastName + ".png"
     const newFileName = newFirstName + "_" + newLastName + ".png"
-    socket.emit('changeFaces', { origFileName: origFileName, newFileName: newFileName });
-    // rename_file(newfilename)
+    socket.emit('see-request', {
+      service_name: "change-faces",
+      origFileName: origFileName,
+      newFileName: newFileName
+     });
     setShowOverlay(false);
   };
 
@@ -54,7 +55,7 @@ const ChangeFaces = () => {
         <button className="left-gallery-button" onClick={handlePrev}>
           &lt; {/* Left arrow symbol */}
         </button>
-        <img src={images[currentIndex]} alt={`Photo ${currentIndex + 1}`} className="scaled-image" />
+        <img src={images[currentIndex]} alt={`Photo ${firstName} ${lastName}`} className="scaled-image" />
         <button className="face-button" onClick={handleFaceClick}>
           Would you like to assign a name to this person?
         </button>

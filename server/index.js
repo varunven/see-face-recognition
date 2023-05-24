@@ -43,58 +43,47 @@ io.on("connection", (socket) => {
     socket.emit("changeFacesResponse", handlechangeFacesResponse);
   });
 
-  socket.on("setObjRecognitionVolume", (data) => {
+  socket.on("objectRecognitionSettings", (data) => {
     const newVolumeNum = data.newVolumeNum;
-    const handleobjRecognitionVolumeResponse = handleObjRecognitionVolume(newVolumeNum);
-    socket.emit("objRecognitionVolumeResponse", handleobjRecognitionVolumeResponse);
-  });
-
-  socket.on("setObjRecognitionMinDist", (data) => {
     const newDist = data.newDist;
-    const handleObjRecognitionMinDistResponse = handleObjRecognitionMinDist(newDist);
-    socket.emit("objRecognitionMinDistResponse", handleObjRecognitionMinDistResponse);
-  });
-
-  socket.on("setObjRecognitionAudioEnable", (data) => {
-    const state = data.state;
-    const handleObjRecognitionAudioEnableResponse = handleObjRecognitionAudioEnable(state);
-    socket.emit("objRecognitionAudioEnableResponse", handleObjRecognitionAudioEnableResponse);
-  });
-
-  socket.on("setObjRecognitionVoice", (data) => {
-    const state = data.state;
-    const handleObjRecognitionVoiceResponse = handleObjRecognitionVoice(state);
-    socket.emit("objRecognitionVoiceResponse", handleObjRecognitionVoiceResponse);
-  });
-
-  socket.on("setObjRecognitionList", (data) => {
+    const audioEnable = data.audioEnable;
+    const objRecognitionVoice = data.objRecognitionVoice;
     const newList = data.newList;
+    const audioPlaybackTime = data.audioPlaybackTime;
+    
+    const handleObjRecognitionVolumeResponse = handleObjRecognitionVolume(newVolumeNum)
+    const handleObjRecognitionMinDistResponse = handleObjRecognitionMinDist(newDist);
+    const handleObjRecognitionAudioEnableResponse = handleObjRecognitionAudioEnable(audioEnable);
+    const handleObjRecognitionVoiceResponse = handleObjRecognitionVoice(objRecognitionVoice);
     const handleObjRecognitionListResponse = handleObjRecognitionList(newList);
-    socket.emit("objRecognitionListResponse", handleObjRecognitionListResponse);
-  });
+    const handleAudioPlayBackResponse = handleAudioPlayBack(audioPlaybackTime);
 
-  socket.on("setBuzzerSidewalk", (data) => {
-    const newFeedbackNum = data.newFeedbackNum;
-    const handleBuzzerSidewalkResponse = handleBuzzerSidewalk(newFeedbackNum);
-    socket.emit("buzzerSidewalkResponse", handleBuzzerSidewalkResponse);
-  });
+    console.log('Received data:', data);  
+    socket.emit("objectRecognitionSettingsResponse",
+      {
+        handleObjRecognitionVolumeResponse,
+        handleObjRecognitionMinDistResponse,
+        handleObjRecognitionAudioEnableResponse,
+        handleObjRecognitionVoiceResponse,
+        handleObjRecognitionListResponse,
+        handleAudioPlayBackResponse
+      });
+  });  
 
-  socket.on("setBuzzerObjectDetection", (data) => {
-    const newFeedbackNum = data.newFeedbackNum;
-    const handleBuzzerObjectDetectionResponse = handleBuzzerObjectDetection(newFeedbackNum);
-    socket.emit("buzzerObjectDetectionResponse", handleBuzzerObjectDetectionResponse);
-  });
-
-  socket.on("setHapticFeedbackEnable", (data) => {
-    const state = data.state;
-    const handleHapticFeedbackEnableResponse = handleHapticFeedbackEnable(state);
-    socket.emit("hapticFeedbackEnableResponse", handleHapticFeedbackEnableResponse);
-  });
-
-  socket.on("setAudioPlayBack", (data) => {
-    const seconds = data.seconds;
-    const handleAudioPlayBackResponse = handleAudioPlayBack(seconds);
-    socket.emit("audioPlayBackResponse", handleAudioPlayBackResponse);
+  socket.on("buzzerSettings", (data) => {
+    const sidewalkDetection = data.sidewalkDetection
+    const objectDetection = data.objectDetection
+    const hapticFeedbackState= data.hapticFeedbackState
+    const handleBuzzerSidewalkResponse = handleBuzzerSidewalk(sidewalkDetection);
+    const handleBuzzerObjectDetectionResponse = handleBuzzerObjectDetection(objectDetection);
+    const handleHapticFeedbackEnableResponse = handleHapticFeedbackEnable(hapticFeedbackState);
+    console.log('Received data:', data);  
+    socket.emit("buzzerSettingsResponse",
+      {
+        handleBuzzerSidewalkResponse,
+        handleBuzzerObjectDetectionResponse,
+        handleHapticFeedbackEnableResponse
+      });
   });
 
   // Handle client disconnect

@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
 
-function BuzzerSettings() {
-    const [ObjectDetection, setObjectDetection] = useState(100);
-    const [SidewalkDetection, setSidewalkDetection] = useState(100);
+function BuzzerSettings({socket}) {
+    const [objDetectionDistanceNear, setObjDetectionDistanceNear] = useState(30);
+    const [objDetectionDistanceMid, setObjDetectionDistanceMid] = useState(100);
+    const [objDetectionDistanceFar, setObjDetectionDistanceFar] = useState(300);
     const [isHapticFeedbackToggled, setHapticFeedbackToggle] = useState(
         localStorage.getItem('HapticFeedbackToggled') === 'true');
     
     useEffect(() => {
         // Retrieve the stored value from local storage on component mount
-        const volume = localStorage.getItem('SidewalkDetection');
-        if (volume) {
-            setSidewalkDetection(parseInt(volume));
+        const distNear = localStorage.getItem('objDetectionDistanceNear');
+        if (distNear) {
+            setObjDetectionDistanceNear(parseInt(distNear));
         }
-        const minDistStoredValue = localStorage.getItem('ObjectDetection');
-        if (minDistStoredValue) {
-            setObjectDetection(parseInt(minDistStoredValue));
+        const distMid = localStorage.getItem('objDetectionDistanceMid');
+        if (distMid) {
+            setObjDetectionDistanceMid(parseInt(distMid));
+        }
+        const distFar = localStorage.getItem('objDetectionDistanceFar');
+        if (distFar) {
+            setObjDetectionDistanceFar(parseInt(distFar));
         }
     }, []);
 
@@ -22,51 +27,82 @@ function BuzzerSettings() {
         localStorage.setItem('HapticFeedbackToggled', isHapticFeedbackToggled);
       }, [isHapticFeedbackToggled]);
     
-    const handleSidewalkTrackingChange = (event) => {
+    const handleObjDistanceNearChange = (event) => {
         const value = parseInt(event.target.value);
-        setSidewalkDetection(value);
+        setObjDetectionDistanceNear(value);
         // Store the value in local storage when it changes
-        localStorage.setItem('SidewalkDetection', value.toString());
+        localStorage.setItem('objDetectionDistanceNear', value.toString());
     };
 
-    const handleObjectDetectionChange = (event) => {
+    const handleObjDistanceMidChange = (event) => {
         const value = parseInt(event.target.value);
-        setObjectDetection(value);
+        setObjDetectionDistanceMid(value);
         // Store the value in local storage when it changes
-        localStorage.setItem('ObjectDetection', value.toString());
+        localStorage.setItem('objDetectionDistanceMid', value.toString());
+    };
+
+    const handleObjDistanceFarChange = (event) => {
+        const value = parseInt(event.target.value);
+        setObjDetectionDistanceFar(value);
+        // Store the value in local storage when it changes
+        localStorage.setItem('objDetectionDistanceFar', value.toString());
     };
 
     const handlehapticFeedbackToggle = () => {
         setHapticFeedbackToggle((isHapticFeedbackToggled) => !isHapticFeedbackToggled);
     };
     
+    const handleSubmit = (objDetectionDistanceNear, objDetectionDistanceMid, objDetectionDistanceFar, isHapticFeedbackToggled) => {
+        console.log("Submitted buzzer settings")
+        socket.emit('see-request', {
+            service_name: "buzzer-settings",
+            objDetectionDistanceNear: objDetectionDistanceNear,
+            objDetectionDistanceMid: objDetectionDistanceMid,
+            objDetectionDistanceFar : objDetectionDistanceFar,
+            hapticFeedbackState : isHapticFeedbackToggled
+        });
+    };
+
     return (
         <div>
         <div>
-            <label htmlFor="ObjectDetection">Haptic Feedback Buzzers for Sidewalk Tracking</label>
+            <label htmlFor="objDetectionDistanceNear">Minimum Distance for Object Detection (Near)</label>
             <input
                 type="range"
-                id="ObjectDetection"
+                id="objDetectionDistanceNear"
                 min={0}
-                max={100}
-                value={ObjectDetection}
-                onChange={handleObjectDetectionChange}
+                max={400}
+                value={objDetectionDistanceNear}
+                onChange={handleObjDistanceNearChange}
             />
-            <span>{ObjectDetection}</span>
-            </div>
-            <div>
-            <label htmlFor="SidewalkTracking">Haptic Feedback Buzzers for Object Detection</label>
+            <span>{objDetectionDistanceNear}</span>
+        </div>
+        <div>
+            <label htmlFor="objDetectionDistanceMid">Minimum Distance for Object Detection (Middle)</label>
             <input
                 type="range"
-                id="SidewalkTracking"
+                id="objDetectionDistanceMid"
                 min={0}
-                max={100}
-                value={SidewalkDetection}
-                onChange={handleSidewalkTrackingChange}
+                max={400}
+                value={objDetectionDistanceMid}
+                onChange={handleObjDistanceMidChange}
             />
-            <span>{SidewalkDetection}</span>
-            </div>
-            <div className="hapticFeedbackToggle-container">
+            <span>{objDetectionDistanceMid}</span>
+        </div>
+        <div>
+            <label htmlFor="objDetectionDistanceFar">Minimum Distance for Object Detection (Far)</label>
+            <input
+                type="range"
+                id="objDetectionDistanceFar"
+                min={0}
+                max={400}
+                value={objDetectionDistanceFar}
+                onChange={handleObjDistanceFarChange}
+            />
+            <span>{objDetectionDistanceFar}</span>
+        </div>
+            
+        <div className="hapticFeedbackToggle-container">
             <div className="text-container">
             <p>{isHapticFeedbackToggled ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
             </div>
@@ -75,6 +111,7 @@ function BuzzerSettings() {
             <span className="slider"></span>
             </label>
         </div>
+        <button onClick={() => handleSubmit(objDetectionDistanceNear, objDetectionDistanceMid, objDetectionDistanceFar, isHapticFeedbackToggled)}>Submit</button>
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-function ObjectRecognitionSettings() {
+function ObjectRecognitionSettings({socket}) {
+
   const [VolumeControl, setVolumeControl] = useState(100);
   const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(500);
   const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
@@ -8,9 +9,9 @@ function ObjectRecognitionSettings() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [rowStates, setRowStates] = useState(Array(1));
   const [voiceGender, setVoiceGender] = useState('');
-  const [playBackFrequency, setPlayBackFrequency] = useState('');
+  const [audioPlaybackTime, setAudioPlaybackTime] = useState('');
   const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
-
+  
   // Volume and Distance Slider Controls
   useEffect(() => {
     const volume = localStorage.getItem('VolumeControl');
@@ -21,16 +22,16 @@ function ObjectRecognitionSettings() {
     if (minDistStoredValue) {
       setMinimumDistanceForAudio(parseInt(minDistStoredValue));
     }
-  }, []);
+  }, [VolumeControl, MinimumDistanceForAudio]);
 
-  // Object Recognition Audio 
+  // Object Recognition Audio Toggle and Gender
   useEffect(() => {
     localStorage.setItem('ObjectRecognitionAudioToggled', isObjectRecognitionAudioToggled);
     const gender = localStorage.getItem('VoiceGender');
     if (gender) {
       setVoiceGender(gender);
     }
-  }, [isObjectRecognitionAudioToggled]);
+  }, [isObjectRecognitionAudioToggled, voiceGender]);
   
   // Object Recognition Menu
   useEffect(() => {
@@ -42,12 +43,11 @@ function ObjectRecognitionSettings() {
 
   // Audio Playback Control
   useEffect(() => {
-    // Retrieve the frequency value from localStorage
-    const storedFrequencyPlayBack= localStorage.getItem('audioFrequencyPlayBack');
-    if (storedFrequencyPlayBack) {
-      setPlayBackFrequency(storedFrequencyPlayBack);
+    const storedAudioPlaybackTime= localStorage.getItem('audioPlaybackTime');
+    if (storedAudioPlaybackTime) {
+      setAudioPlaybackTime(storedAudioPlaybackTime);
     }
-  }, []);
+  }, [audioPlaybackTime]);
 
   const handleVolumeControl = (event) => {
     const value = parseInt(event.target.value);
@@ -86,8 +86,21 @@ function ObjectRecognitionSettings() {
 
   const handleAudioPlayBack = (event) => {
     const value = event.target.value
-    setPlayBackFrequency(value);
-    localStorage.setItem('audioFrequencyPlayBack', value);
+    setAudioPlaybackTime(value);
+    localStorage.setItem('audioPlaybackTime', value);
+  };
+
+  const handleSubmit = (newVolumeNum, newDist, audioEnable, objRecognitionVoice, newList, audioPlaybackTime) => {
+    console.log("Submitted object recognition settings")
+    socket.emit('see_request', {
+      service_name: "object-recognition-settings",
+      newVolumeNum: newVolumeNum,
+      newDist: newDist,
+      audioEnable: audioEnable,
+      objRecognitionVoice: objRecognitionVoice,
+      newList: newList,
+      audioPlaybackTime: audioPlaybackTime
+    });
   };
     
   return (
@@ -164,9 +177,11 @@ function ObjectRecognitionSettings() {
     <div>
         <label>
           How often should the audio playback for objects recognized be relayed?
-          <input type="text" value={playBackFrequency} onChange={handleAudioPlayBack} />
+          <input type="text" value={audioPlaybackTime} onChange={handleAudioPlayBack} />
         </label>
-    </div>
+      </div>
+      <button onClick={() => handleSubmit(VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled,
+        voiceGender, audioPlaybackTime, audioPlaybackTime)}>Submit</button>
     </div>
   );
 }
