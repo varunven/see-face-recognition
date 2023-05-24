@@ -29,13 +29,13 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* <div className="Menu">
+        <div className="Menu">
           <Link to="/" className="MenuItem">Home</Link>
           <Link to="/objectrecognition" className="MenuItem">Object Recognition Settings</Link>
           <Link to="/buzzersettings" className="MenuItem">Buzzer Settings</Link>
           <Link to="/changefaces" className="MenuItem">Change Faces</Link>
           <Link to="/forgetfaces" className="MenuItem">Forget Faces</Link>
-        </div> */}
+        </div>
 
         <div>
           <Routes>

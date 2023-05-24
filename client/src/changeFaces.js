@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import socketIOClient from 'socket.io-client';
 import face_images from './face_images'
 
 const ChangeFaces = () => {
+  const socket = socketIOClient('http://localhost:3001');
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
   const [newFirstName, setFirstName] = useState("");
@@ -27,9 +30,11 @@ const ChangeFaces = () => {
     setShowOverlay(true);
   };
 
-  const handleSubmit = (firstname, lastname) => {
+  const handleSubmit = (firstName, lastName, newFirstName, newLastName) => {
     console.log(images[currentIndex])
-    var newfilename = firstname + "_" + lastname + ".png"
+    const origFileName = firstName + "_" + lastName + ".png"
+    const newFileName = newFirstName + "_" + newLastName + ".png"
+    socket.emit('changeFaces', { origFileName: origFileName, newFileName: newFileName });
     // rename_file(newfilename)
     setShowOverlay(false);
   };
@@ -69,7 +74,7 @@ const ChangeFaces = () => {
               value={newLastName}
               onChange={(e) => setLastName(e.target.value)}
             />
-            <button onClick={() => handleSubmit(newFirstName, newLastName)}>Submit</button>
+            <button onClick={() => handleSubmit(firstName, lastName, newFirstName, newLastName)}>Submit</button>
           </div>
         </div>
       )}

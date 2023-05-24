@@ -1,6 +1,9 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import socketIOClient from 'socket.io-client';
 
 function ForgetFaces() {
+  const socket = socketIOClient('http://localhost:3001');
+  
   const [showPopup, setShowPopup] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordEntered, setPasswordEntered] = useState(false);
@@ -24,8 +27,10 @@ function ForgetFaces() {
 
     if (password === correctPassword) {
       setPasswordResult('Correct password entered!');
+      socket.emit('forgetFace', { toForget: true });
     } else {
       setPasswordResult('Incorrect password entered!');
+      socket.emit('forgetFace', { toForget: false });
     }
 
     setPassword('');

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 function ObjectRecognitionSettings() {
   const [VolumeControl, setVolumeControl] = useState(100);
-  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(5);
+  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(500);
   const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
     localStorage.getItem('ObjectRecognitionAudioToggled') === 'true');
   const [menuOpen, setMenuOpen] = useState(false);
   const [rowStates, setRowStates] = useState(Array(1));
   const [voiceGender, setVoiceGender] = useState('');
+  const [playBackFrequency, setPlayBackFrequency] = useState('');
   const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
 
   // Volume and Distance Slider Controls
@@ -39,11 +40,20 @@ function ObjectRecognitionSettings() {
     }
   }, []);
 
+  // Audio Playback Control
+  useEffect(() => {
+    // Retrieve the frequency value from localStorage
+    const storedFrequencyPlayBack= localStorage.getItem('audioFrequencyPlayBack');
+    if (storedFrequencyPlayBack) {
+      setPlayBackFrequency(storedFrequencyPlayBack);
+    }
+  }, []);
+
   const handleVolumeControl = (event) => {
-      const value = parseInt(event.target.value);
-      setVolumeControl(value);
-      // Store the value in local storage when it changes
-      localStorage.setItem('VolumeControl', value.toString());
+    const value = parseInt(event.target.value);
+    setVolumeControl(value);
+    // Store the value in local storage when it changes
+    localStorage.setItem('VolumeControl', value.toString());
   };
 
   const handleMinimumDistanceForAudio = (event) => {
@@ -73,6 +83,12 @@ function ObjectRecognitionSettings() {
     setRowStates(newRowStates);
     localStorage.setItem('rowStates', JSON.stringify(newRowStates));
   };
+
+  const handleAudioPlayBack = (event) => {
+    const value = event.target.value
+    setPlayBackFrequency(value);
+    localStorage.setItem('audioFrequencyPlayBack', value);
+  };
     
   return (
     <div>
@@ -95,7 +111,7 @@ function ObjectRecognitionSettings() {
           type="range"
           id="MinimumDistanceForAudio"
           min={0}
-          max={5.0}
+          max={500.0}
           value={MinimumDistanceForAudio}
           onChange={handleMinimumDistanceForAudio}
         />
@@ -130,7 +146,7 @@ function ObjectRecognitionSettings() {
       </div>
     </div>
           
-    <div className="App">
+    <div className="ObjectRecognitionMenu">
         <button onClick={toggleObjectRecognitionMenu}>Objects to Recognize</button>
         {menuOpen && (
         <div className="popup-container">
@@ -144,6 +160,12 @@ function ObjectRecognitionSettings() {
             </div>
         </div>
         )}
+    </div>
+    <div>
+        <label>
+          How often should the audio playback for objects recognized be relayed?
+          <input type="text" value={playBackFrequency} onChange={handleAudioPlayBack} />
+        </label>
     </div>
     </div>
   );
