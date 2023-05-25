@@ -146,14 +146,12 @@ function ObjectRecognitionSettings({socket}) {
       <div className="switch-container">
         <div
           className={`option ${voiceGender === 'Male' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Male')}
-        >
+          onClick={() => handleVoiceGenderSelect('Male')}>
           Male Voice
         </div>
         <div
           className={`option ${voiceGender === 'Female' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Female')}
-        >
+          onClick={() => handleVoiceGenderSelect('Female')}>
           Female Voice
         </div>
       </div>
@@ -181,7 +179,7 @@ function ObjectRecognitionSettings({socket}) {
         </label>
       </div>
       <button onClick={() => handleSubmit(VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled,
-        voiceGender, audioPlaybackTime, audioPlaybackTime)}>Submit</button>
+        voiceGender, rowStates, audioPlaybackTime)}>Submit</button>
     </div>
   );
 }

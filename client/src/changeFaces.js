@@ -47,7 +47,7 @@ const ChangeFaces = ({socket}) => {
       setFirstName(parseInt(name.split(" ")[0]));
       setLastName(parseInt(name.split(" ")[1]));
     }
-  }, []);
+  }, [currentIndex]);
 
   return (
     <div className="gallery">
@@ -56,9 +56,11 @@ const ChangeFaces = ({socket}) => {
           &lt; {/* Left arrow symbol */}
         </button>
         <img src={images[currentIndex]} alt={`Photo ${firstName} ${lastName}`} className="scaled-image" />
-        <button className="face-button" onClick={handleFaceClick}>
-          Would you like to assign a name to this person?
-        </button>
+        <div className="button-container">
+          <button className="face-button" onClick={handleFaceClick}>
+            Would you like to assign a name to this person?
+          </button>
+        </div>
         {showOverlay && (
         <div className="overlay">
           <div className="overlay-content">
