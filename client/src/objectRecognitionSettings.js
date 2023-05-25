@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-function ObjectRecognitionSettings() {
+function ObjectRecognitionSettings({socket}) {
+
   const [VolumeControl, setVolumeControl] = useState(100);
-  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(5);
+  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(500);
   const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
     localStorage.getItem('ObjectRecognitionAudioToggled') === 'true');
   const [menuOpen, setMenuOpen] = useState(false);
   const [rowStates, setRowStates] = useState(Array(1));
   const [voiceGender, setVoiceGender] = useState('');
+  const [audioPlaybackTime, setAudioPlaybackTime] = useState('');
   const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
-
+  
   // Volume and Distance Slider Controls
   useEffect(() => {
     const volume = localStorage.getItem('VolumeControl');
@@ -20,16 +22,16 @@ function ObjectRecognitionSettings() {
     if (minDistStoredValue) {
       setMinimumDistanceForAudio(parseInt(minDistStoredValue));
     }
-  }, []);
+  }, [VolumeControl, MinimumDistanceForAudio]);
 
-  // Object Recognition Audio 
+  // Object Recognition Audio Toggle and Gender
   useEffect(() => {
     localStorage.setItem('ObjectRecognitionAudioToggled', isObjectRecognitionAudioToggled);
     const gender = localStorage.getItem('VoiceGender');
     if (gender) {
       setVoiceGender(gender);
     }
-  }, [isObjectRecognitionAudioToggled]);
+  }, [isObjectRecognitionAudioToggled, voiceGender]);
   
   // Object Recognition Menu
   useEffect(() => {
@@ -39,11 +41,19 @@ function ObjectRecognitionSettings() {
     }
   }, []);
 
+  // Audio Playback Control
+  useEffect(() => {
+    const storedAudioPlaybackTime= localStorage.getItem('audioPlaybackTime');
+    if (storedAudioPlaybackTime) {
+      setAudioPlaybackTime(storedAudioPlaybackTime);
+    }
+  }, [audioPlaybackTime]);
+
   const handleVolumeControl = (event) => {
-      const value = parseInt(event.target.value);
-      setVolumeControl(value);
-      // Store the value in local storage when it changes
-      localStorage.setItem('VolumeControl', value.toString());
+    const value = parseInt(event.target.value);
+    setVolumeControl(value);
+    // Store the value in local storage when it changes
+    localStorage.setItem('VolumeControl', value.toString());
   };
 
   const handleMinimumDistanceForAudio = (event) => {
@@ -73,6 +83,25 @@ function ObjectRecognitionSettings() {
     setRowStates(newRowStates);
     localStorage.setItem('rowStates', JSON.stringify(newRowStates));
   };
+
+  const handleAudioPlayBack = (event) => {
+    const value = event.target.value
+    setAudioPlaybackTime(value);
+    localStorage.setItem('audioPlaybackTime', value);
+  };
+
+  const handleSubmit = (newVolumeNum, newDist, audioEnable, objRecognitionVoice, newList, audioPlaybackTime) => {
+    console.log("Submitted object recognition settings")
+    socket.emit('see_request', {
+      service_name: "object-recognition-settings",
+      newVolumeNum: newVolumeNum,
+      newDist: newDist,
+      audioEnable: audioEnable,
+      objRecognitionVoice: objRecognitionVoice,
+      newList: newList,
+      audioPlaybackTime: audioPlaybackTime
+    });
+  };
     
   return (
     <div>
@@ -95,7 +124,7 @@ function ObjectRecognitionSettings() {
           type="range"
           id="MinimumDistanceForAudio"
           min={0}
-          max={5.0}
+          max={500.0}
           value={MinimumDistanceForAudio}
           onChange={handleMinimumDistanceForAudio}
         />
@@ -117,20 +146,18 @@ function ObjectRecognitionSettings() {
       <div className="switch-container">
         <div
           className={`option ${voiceGender === 'Male' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Male')}
-        >
+          onClick={() => handleVoiceGenderSelect('Male')}>
           Male Voice
         </div>
         <div
           className={`option ${voiceGender === 'Female' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Female')}
-        >
+          onClick={() => handleVoiceGenderSelect('Female')}>
           Female Voice
         </div>
       </div>
     </div>
           
-    <div className="App">
+    <div className="ObjectRecognitionMenu">
         <button onClick={toggleObjectRecognitionMenu}>Objects to Recognize</button>
         {menuOpen && (
         <div className="popup-container">
@@ -145,6 +172,14 @@ function ObjectRecognitionSettings() {
         </div>
         )}
     </div>
+    <div>
+        <label>
+          How often should the audio playback for objects recognized be relayed?
+          <input type="text" value={audioPlaybackTime} onChange={handleAudioPlayBack} />
+        </label>
+      </div>
+      <button onClick={() => handleSubmit(VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled,
+        voiceGender, rowStates, audioPlaybackTime)}>Submit</button>
     </div>
   );
 }

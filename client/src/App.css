@@ -207,6 +207,16 @@ input:checked + .slider:before {
   height: 400px; /* Preserve aspect ratio */
 }
 
+.image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button-container {
+  margin-top: 10px;
+}
+
 .gallery-container {
   position: relative;
   height: 300px;
