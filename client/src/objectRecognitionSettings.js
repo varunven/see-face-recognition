@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
 function ObjectRecognitionSettings({socket}) {
+  const recognizable_objects = 
+    ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"]
 
   const [VolumeControl, setVolumeControl] = useState(100);
   const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(500);
   const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
     localStorage.getItem('ObjectRecognitionAudioToggled') === 'true');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [rowStates, setRowStates] = useState(Array(1));
+  const [rowStates, setRowStates] = useState(Array(recognizable_objects.length).fill(0));
   const [voiceGender, setVoiceGender] = useState('');
   const [audioPlaybackTime, setAudioPlaybackTime] = useState('');
-  const recognizable_objects = ['People', 'Cars', 'Cell phone', 'Laptop', 'TV', 'Traffic light', 'Dog', 'Stop sign', 'Bicycle']
   
   // Volume and Distance Slider Controls
   useEffect(() => {
@@ -56,12 +57,12 @@ function ObjectRecognitionSettings({socket}) {
     localStorage.setItem('VolumeControl', value.toString());
   };
 
-  const handleMinimumDistanceForAudio = (event) => {
-      const value = parseInt(event.target.value);
-      setMinimumDistanceForAudio(value);
-      // Store the value in local storage when it changes
-      localStorage.setItem('MinimumDistanceForAudio', value.toString());
-  };
+  // const handleMinimumDistanceForAudio = (event) => {
+  //     const value = parseInt(event.target.value);
+  //     setMinimumDistanceForAudio(value);
+  //     // Store the value in local storage when it changes
+  //     localStorage.setItem('MinimumDistanceForAudio', value.toString());
+  // };
 
   const handleobjectRecognitionAudioToggled = () => {
       setisObjectRecognitionAudioToggled((isObjectRecognitionAudioToggled) => !isObjectRecognitionAudioToggled);
@@ -77,12 +78,25 @@ function ObjectRecognitionSettings({socket}) {
     setMenuOpen(!menuOpen);
   };
 
-  const toggleObjectRecognitionRowState = (index) => {
+  const handleSliderChange = (index, value) => {
     const newRowStates = [...rowStates];
-    newRowStates[index] = !newRowStates[index];
+    newRowStates[index] = value;
     setRowStates(newRowStates);
     localStorage.setItem('rowStates', JSON.stringify(newRowStates));
   };
+
+  function getMapOfStates(rowStates){
+    const my_map = new Map()
+    for (let i = 0; i < recognizable_objects.length; i++) {
+      if (rowStates[i]) {
+        my_map[recognizable_objects[i]] = rowStates[i]
+      }
+      else {
+        my_map[recognizable_objects[i]] = 0 // default priority?
+      }
+    }
+    return my_map
+  }
 
   const handleAudioPlayBack = (event) => {
     const value = event.target.value
@@ -90,23 +104,23 @@ function ObjectRecognitionSettings({socket}) {
     localStorage.setItem('audioPlaybackTime', value);
   };
 
-  const handleSubmit = (newVolumeNum, newDist, audioEnable, objRecognitionVoice, newList, audioPlaybackTime) => {
+  const handleSubmit = (newVolume, newDist, audioEnable, objRecognitionVoice, objMap, audioPlaybackTime) => {
     console.log("Submitted object recognition settings")
-    socket.emit('see_request', {
+    socket.emit('see-request', {
       service_name: "object-recognition-settings",
-      newVolumeNum: newVolumeNum,
-      newDist: newDist,
+      volume: newVolume,
+      dist: newDist,
       audioEnable: audioEnable,
       objRecognitionVoice: objRecognitionVoice,
-      newList: newList,
+      objMap: objMap,
       audioPlaybackTime: audioPlaybackTime
     });
   };
-    
+  
   return (
     <div>
       <div>
-      <label htmlFor="VolumeControl">Volume for Object Recognition Audio Outputs</label>
+      <label htmlFor="VolumeControl">Volume for Audio Outputs</label>
         <input
           type="range"
           id="VolumeControl"
@@ -118,7 +132,7 @@ function ObjectRecognitionSettings({socket}) {
         <span>{VolumeControl}</span>
     </div>
           
-    <div>
+    {/* <div>
       <label htmlFor="MinimumDistanceForAudio">Minimum Distance for Recognized Object Audio Queues</label>
         <input
           type="range"
@@ -129,7 +143,7 @@ function ObjectRecognitionSettings({socket}) {
           onChange={handleMinimumDistanceForAudio}
         />
         <span>{MinimumDistanceForAudio}</span>
-      </div>
+      </div> */}
 
       <div className="objectRecognitionAudioToggled-container">
       <div className="text-container">
@@ -162,12 +176,19 @@ function ObjectRecognitionSettings({socket}) {
         {menuOpen && (
         <div className="popup-container">
             <div className="menu-content">
-            {[...Array(recognizable_objects.length).keys()].map((index) => (
-                <div key={index} className="row" onClick={() => toggleObjectRecognitionRowState(index)}>
-                <span className="label">Recognize {recognizable_objects[index]}?</span>
-                <div className={`box ${rowStates[index] ? 'green' : 'white'}`} />
-                </div>
-            ))}
+            {recognizable_objects.map((object, index) => (
+              <div key={index} className="row">
+                <span className="label">What priority should {object} have?</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  value={rowStates[index]}
+                  onChange={(event) => handleSliderChange(index, parseInt(event.target.value))}
+                />
+                <span className="slider-value">{rowStates[index]}</span>
+              </div>
+              ))}
             </div>
         </div>
         )}
@@ -179,7 +200,7 @@ function ObjectRecognitionSettings({socket}) {
         </label>
       </div>
       <button onClick={() => handleSubmit(VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled,
-        voiceGender, rowStates, audioPlaybackTime)}>Submit</button>
+        voiceGender, getMapOfStates(rowStates), audioPlaybackTime)}>Submit</button>
     </div>
   );
 }

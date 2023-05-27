@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function BuzzerSettings({socket}) {
+function ObjectDetectionSettings({socket}) {
     const [objDetectionDistanceNear, setObjDetectionDistanceNear] = useState(30);
     const [objDetectionDistanceMid, setObjDetectionDistanceMid] = useState(100);
     const [objDetectionDistanceFar, setObjDetectionDistanceFar] = useState(300);
@@ -53,9 +53,19 @@ function BuzzerSettings({socket}) {
     };
     
     const handleSubmit = (objDetectionDistanceNear, objDetectionDistanceMid, objDetectionDistanceFar, isHapticFeedbackToggled) => {
-        console.log("Submitted buzzer settings")
+        console.log("Submitted object detection settings")
+        if (objDetectionDistanceNear > objDetectionDistanceMid) {
+            objDetectionDistanceMid = objDetectionDistanceNear + 1
+            objDetectionDistanceMid = Math.min(objDetectionDistanceMid, 400)
+            setObjDetectionDistanceMid(objDetectionDistanceMid);
+        }
+        if (objDetectionDistanceMid > objDetectionDistanceFar) {
+            objDetectionDistanceFar = objDetectionDistanceMid + 1
+            objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
+            setObjDetectionDistanceFar(objDetectionDistanceFar);
+        }
         socket.emit('see-request', {
-            service_name: "buzzer-settings",
+            service_name: "object-detection-settings",
             objDetectionDistanceNear: objDetectionDistanceNear,
             objDetectionDistanceMid: objDetectionDistanceMid,
             objDetectionDistanceFar : objDetectionDistanceFar,
@@ -116,4 +126,4 @@ function BuzzerSettings({socket}) {
     );
 }
 
-export default BuzzerSettings;
+export default ObjectDetectionSettings;

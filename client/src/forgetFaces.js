@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
 function ForgetFaces({ socket }) {
-  const [showPopup, setShowPopup] = useState(false);
-  const [passwordResult, setForgettingResult] = useState('');
+  const [showPopup, setShowPopup] = useState(false)
+  const [passwordResult, setForgettingResult] = useState('')
 
   const handleInitialButtonClick = () => {
-    setShowPopup(true);
-  };
+    setShowPopup(true)
+  }
 
   const handlePopupButtonClick = () => {
+    console.log("Forgetting all faces")
     socket.emit('see-request', {
       service_name: "forget-faces",
       toForget: true
-    });
-    setForgettingResult('Faces forgotten successfully!');
-  };
+    })
+    setForgettingResult('Faces forgotten successfully!')
+  }
 
   return (
     <div>
@@ -27,7 +28,7 @@ function ForgetFaces({ socket }) {
       )}
       {passwordResult && <p>{passwordResult}</p>}
     </div>
-  );
+  )
 }
 
-export default ForgetFaces;
+export default ForgetFaces
