@@ -14,7 +14,10 @@
     "react-speech-recognition": "^3.10.0",
     "react-swipeable": "^7.0.0",
     "reactjs-popup": "^2.0.5",
+<<<<<<< HEAD
+=======
     "socket.io": "^4.6.1",
+>>>>>>> e07254d1870af7d6690346675b4bd16dccc50db1
     "socket.io-client": "^4.6.1",
     "web-vitals": "^2.1.4"
   },

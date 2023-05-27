@@ -5,7 +5,6 @@ import SpeechSynthesis from "./SpeechSynthesis";
 const SpeechAssistant = ({
     commands
 }) => {
-    console.log("hji");
 
     const changeVoice = (gender) => {
         console.log(gender);
