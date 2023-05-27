@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-function ObjectRecognitionSettings({socket}) {
+function ObjectRecognitionSettings({
+  socket,
+  onSettingsChange
+}) {
+
+
+
   const recognizable_objects = 
     ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"]
 
@@ -12,6 +18,18 @@ function ObjectRecognitionSettings({socket}) {
   const [rowStates, setRowStates] = useState(Array(recognizable_objects.length).fill(0));
   const [voiceGender, setVoiceGender] = useState('');
   const [audioPlaybackTime, setAudioPlaybackTime] = useState('');
+
+  const settings = [VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled, menuOpen, rowStates, voiceGender, audioPlaybackTime];
+
+  useEffect(() => {
+    onSettingsChange("objectRecognition",
+      `Volume for Audio Outputs: ${VolumeControl}. 
+      Object recognition audio: ${isObjectRecognitionAudioToggled ? `enabled` : `disabled`}.
+      Current audio voice: ${voiceGender},
+      Objects to recognize: person, car, bicycle, and more. To list all objects, say: list my objects. 
+        You can also set priority for different objects. To set priority, say: set priority of object to number
+      Audio playback time interval: ${audioPlaybackTime}`);
+  }, settings);
   
   // Volume and Distance Slider Controls
   useEffect(() => {

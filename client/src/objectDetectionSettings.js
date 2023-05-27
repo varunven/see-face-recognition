@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
 
-function ObjectDetectionSettings({socket}) {
+function ObjectDetectionSettings({
+    socket, onSettingsChange
+}) {
+
+
+
+
     const [objDetectionDistanceNear, setObjDetectionDistanceNear] = useState(30);
     const [objDetectionDistanceMid, setObjDetectionDistanceMid] = useState(100);
     const [objDetectionDistanceFar, setObjDetectionDistanceFar] = useState(300);
     const [isHapticFeedbackToggled, setHapticFeedbackToggle] = useState(
         localStorage.getItem('HapticFeedbackToggled') === 'true');
+
+
+    const settings = [objDetectionDistanceNear, setHapticFeedbackToggle];
+
+    useEffect(() => {
+        onSettingsChange("objectDetection",
+        `Minimum distances for object detection: 
+            close proximity: ${objDetectionDistanceNear / 100} meters. 
+            medium proximity: ${objDetectionDistanceMid / 100} meters. 
+            distant proximity ${objDetectionDistanceFar / 100} meters.
+        Haptic Feedback: ${isHapticFeedbackToggled ? "enabled" : "disabled"}`)
+    }, settings)
     
     useEffect(() => {
         // Retrieve the stored value from local storage on component mount

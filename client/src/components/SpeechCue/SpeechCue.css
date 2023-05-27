@@ -1,0 +1,38 @@
+.cue-container-active, .cue-container-inactive {
+    width: 100%;
+    position: fixed;
+    background-color: #190c40;
+    padding: 20px;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.cue-container {
+    display: none;
+}
+
+.cue-container-active {
+    opacity: 1;
+    animation: fade 0.25s linear;
+}
+
+.cue-container-inactive {
+    opacity: 0;
+    animation: fadeout 0.25s linear;
+}
+
+.anim-sphere {
+    width: 150px;
+}
+
+@keyframes fade {
+    0%{ opacity: 0 }
+    100% { opacity: 1 }
+  }
+
+@keyframes fadeout {
+0%{ opacity: 1 }
+100% { opacity: 0 }
+}
