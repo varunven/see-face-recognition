@@ -22,7 +22,6 @@ const SpeechSynthesis = ({
         }
   
         u.onend = () => {
-          console.log("setting timeout...");
           timeoutRef.current = setTimeout(() => {
             setActive(false);
           }, 3000);
@@ -39,7 +38,6 @@ const SpeechSynthesis = ({
 
     useEffect(() => {
       if (active) {
-        console.log("keeping it alive");
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
           setActive(false);

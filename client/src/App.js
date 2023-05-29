@@ -36,12 +36,28 @@ function App() {
     objectDetection: "",
   });
 
+  const [voiceCommandError, setVoiceCommandError] = useState("");
+
   const onSettingsChange = (page, newSettingsText) => {
     setAllPagesText(prevSettings => ({
       ...prevSettings,
       [page]: newSettingsText
     }));
   }
+
+
+  // const updateObjectRecognitionSettings = (audioVol, isAudioOn, voiceGender, objsToRecognize, audioPlaybackTime) => {
+  //   const newSettings = {
+  //     audioVolume: audioVol,
+  //     isAudioOn: isAudioOn,
+  //     voiceGender: voiceGender,
+  //     objsToRecognize: objsToRecognize,
+  //     audioPlaybackTime: audioPlaybackTime
+  //   }
+
+
+
+  // }
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -60,6 +76,7 @@ function App() {
     <Router>
       <div className="App">
         <div className="Menu">
+          <SpeechAssistant socket={socket} allPagesText={allPagesText} voiceError={voiceCommandError}></SpeechAssistant>
           <Link to="/" className="MenuItem">Home</Link>
           <Link to="/object-recognition" className="MenuItem">Object Recognition Settings</Link>
           <Link to="/object-detection" className="MenuItem">Object Detection Settings</Link>
@@ -70,14 +87,13 @@ function App() {
         <div>
           <Routes>
             <Route exact path="/" element={<Home />} />
-            <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange}/>} />
-            <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange}/>} />
+            <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
+            <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
             <Route exact path="/change-faces" element={<ChangeFaces socket={socket}/>} />
             <Route exact path="/forget-faces" element={<ForgetFaces socket={socket}/>} />
             <Route exact path="/viewStream" element={<ViewStream />} />
           </Routes>
         </div>
-        <SpeechAssistant socket={socket} allPagesText={allPagesText}></SpeechAssistant>
       </div>
     </Router>
   );

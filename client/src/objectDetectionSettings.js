@@ -1,95 +1,148 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
+import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
 
 function ObjectDetectionSettings({
-    socket, onSettingsChange
+    socket, 
+    onSettingsChange,
+    onVoiceCommandError
 }) {
 
+    const newVoiceSettings = useLocation().state;
 
+    const [settings, setSettings] = useState({
+        isHapticOn: localStorage.getItem('isHapticOn') ? JSON.parse(localStorage.getItem('isHapticOn')) : true,
+        nearCutoff: localStorage.getItem('nearCutoff') ? parseInt(localStorage.getItem('nearCutoff')) : 100,
+        midCutoff: localStorage.getItem('midCutoff') ? parseInt(localStorage.getItem('midCutoff')) : 200,
+        farCutoff: localStorage.getItem('farCutoff') ? parseInt(localStorage.getItem('farCutoff')) : 450
+      });
 
-
-    const [objDetectionDistanceNear, setObjDetectionDistanceNear] = useState(30);
-    const [objDetectionDistanceMid, setObjDetectionDistanceMid] = useState(100);
-    const [objDetectionDistanceFar, setObjDetectionDistanceFar] = useState(300);
-    const [isHapticFeedbackToggled, setHapticFeedbackToggle] = useState(
-        localStorage.getItem('HapticFeedbackToggled') === 'true');
-
-
-    const settings = [objDetectionDistanceNear, setHapticFeedbackToggle];
 
     useEffect(() => {
         onSettingsChange("objectDetection",
         `Minimum distances for object detection: 
-            close proximity: ${objDetectionDistanceNear / 100} meters. 
-            medium proximity: ${objDetectionDistanceMid / 100} meters. 
-            distant proximity ${objDetectionDistanceFar / 100} meters.
-        Haptic Feedback: ${isHapticFeedbackToggled ? "enabled" : "disabled"}`)
-    }, settings)
-    
-    useEffect(() => {
-        // Retrieve the stored value from local storage on component mount
-        const distNear = localStorage.getItem('objDetectionDistanceNear');
-        if (distNear) {
-            setObjDetectionDistanceNear(parseInt(distNear));
-        }
-        const distMid = localStorage.getItem('objDetectionDistanceMid');
-        if (distMid) {
-            setObjDetectionDistanceMid(parseInt(distMid));
-        }
-        const distFar = localStorage.getItem('objDetectionDistanceFar');
-        if (distFar) {
-            setObjDetectionDistanceFar(parseInt(distFar));
-        }
-    }, []);
+            close proximity: ${settings.nearCutoff / 100} meters. 
+            medium proximity: ${settings.midCutoff / 100} meters. 
+            distant proximity ${settings.farCutoff / 100} meters.
+        Haptic Feedback: ${settings.isHapticOn ? "enabled" : "disabled"}`)
+    }, [settings])
+
 
     useEffect(() => {
-        localStorage.setItem('HapticFeedbackToggled', isHapticFeedbackToggled);
-      }, [isHapticFeedbackToggled]);
+
+        const updateSettings = async() => {
+          window.history.replaceState({}, document.title)
+          console.log("receiving new settings via voice commands");
+          console.log(newVoiceSettings);
+          onVoiceCommandError("");
+          console.log("Sending settings to pi");
+          const {nearCutoff = null, midCutoff = null, farCutoff = null, isHapticOn = null} = newVoiceSettings ?? {};
     
+          const newSettings = {
+            isHapticOn: isHapticOn != null ? isHapticOn : settings.isHapticOn,
+            nearCutoff: nearCutoff ? nearCutoff : settings.nearCutoff,
+            midCutoff: midCutoff ? midCutoff : settings.midCutoff,
+            farCutoff: farCutoff ? farCutoff : settings.farCutoff
+          }
+        
+          console.log(`new setings`);
+          console.log(newSettings);
+          // submit request to rasp pi first, and only update u.i on successfully changing settings
+          await sendSeeRequest(socket, {
+            service_name: "object-detection-settings",
+            newSettings: newSettings
+          }).then(res => {
+              console.log("received response");
+              setSettings(newSettings);
+              setAllLocalStorageSettings(newSettings);
+              }
+            )
+            .catch((err) => {
+              console.log("WHYY");
+              onVoiceCommandError("Could not update object detection settings. Please try again")});
+        }
+    
+        if (socket.connected) {
+          updateSettings();
+        } else {
+          setTimeout(() => {
+            console.log("retrying");
+            updateSettings();
+          }, 1000);
+        }
+        
+      }, [newVoiceSettings])
+    
+
     const handleObjDistanceNearChange = (event) => {
-        const value = parseInt(event.target.value);
-        setObjDetectionDistanceNear(value);
+        const newNearValue = parseInt(event.target.value);
+
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            nearCutoff: newNearValue,
+        }));
         // Store the value in local storage when it changes
-        localStorage.setItem('objDetectionDistanceNear', value.toString());
+        localStorage.setItem('nearCutoff', newNearValue);
     };
 
     const handleObjDistanceMidChange = (event) => {
-        const value = parseInt(event.target.value);
-        setObjDetectionDistanceMid(value);
+        const newMidValue = parseInt(event.target.value);
+
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            nearCutoff: newMidValue,
+        }));
         // Store the value in local storage when it changes
-        localStorage.setItem('objDetectionDistanceMid', value.toString());
+        localStorage.setItem('midCutOff', newMidValue);
     };
 
     const handleObjDistanceFarChange = (event) => {
-        const value = parseInt(event.target.value);
-        setObjDetectionDistanceFar(value);
+        const newFarValue = parseInt(event.target.value);
+        // const newNearValue = value < settings.nearCutoff ? value - 1 : settings.midCutoff;
+        // const newFarValue = value > settings.newMidValue ? value + 1 : settings.farCutoff;
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            farCutoff: newFarValue
+        }));
         // Store the value in local storage when it changes
-        localStorage.setItem('objDetectionDistanceFar', value.toString());
+        localStorage.setItem('objDetectionDistanceFar', newFarValue);
     };
 
     const handlehapticFeedbackToggle = () => {
-        setHapticFeedbackToggle((isHapticFeedbackToggled) => !isHapticFeedbackToggled);
+        localStorage.setItem("isHapticOn", settings.isHapticOn);
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            isHapticOn: !prevSettings.isHapticOn
+        }));
     };
-    
-    const handleSubmit = (objDetectionDistanceNear, objDetectionDistanceMid, objDetectionDistanceFar, isHapticFeedbackToggled) => {
-        console.log("Submitted object detection settings")
-        if (objDetectionDistanceNear > objDetectionDistanceMid) {
-            objDetectionDistanceMid = objDetectionDistanceNear + 1
-            objDetectionDistanceMid = Math.min(objDetectionDistanceMid, 400)
-            setObjDetectionDistanceMid(objDetectionDistanceMid);
-        }
-        if (objDetectionDistanceMid > objDetectionDistanceFar) {
-            objDetectionDistanceFar = objDetectionDistanceMid + 1
-            objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
-            setObjDetectionDistanceFar(objDetectionDistanceFar);
-        }
-        socket.emit('see-request', {
-            service_name: "object-detection-settings",
-            objDetectionDistanceNear: objDetectionDistanceNear,
-            objDetectionDistanceMid: objDetectionDistanceMid,
-            objDetectionDistanceFar : objDetectionDistanceFar,
-            hapticFeedbackState : isHapticFeedbackToggled
+
+    const submitSettingsUpdateRequest = async(newSettings) => {
+        return await sendSeeRequest(socket, {
+          service_name: "object-detection-settings",
+          newSettings: newSettings
         });
+      }
+    
+    const handleSubmit = async(newSettings) => {
+        console.log("Submitted object detection settings")
+        // if (objDetectionDistanceNear > objDetectionDistanceMid) {
+        //     objDetectionDistanceMid = objDetectionDistanceNear + 1
+        //     objDetectionDistanceMid = Math.min(objDetectionDistanceMid, 400)
+        //     setObjDetectionDistanceMid(objDetectionDistanceMid);
+        // }
+        // if (objDetectionDistanceMid > objDetectionDistanceFar) {
+        //     objDetectionDistanceFar = objDetectionDistanceMid + 1
+        //     objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
+        //     setObjDetectionDistanceFar(objDetectionDistanceFar);
+        // }
+        await submitSettingsUpdateRequest(newSettings);
     };
+
+    const setAllLocalStorageSettings = (newSettings) => {
+        for (let setting in newSettings) {
+          localStorage.setItem(setting, newSettings[setting]);
+        }
+      }
 
     return (
         <div>
@@ -100,10 +153,10 @@ function ObjectDetectionSettings({
                 id="objDetectionDistanceNear"
                 min={0}
                 max={400}
-                value={objDetectionDistanceNear}
+                value={settings.nearCutoff}
                 onChange={handleObjDistanceNearChange}
             />
-            <span>{objDetectionDistanceNear}</span>
+            <span>{settings.nearCutoff}</span>
         </div>
         <div>
             <label htmlFor="objDetectionDistanceMid">Minimum Distance for Object Detection (Middle)</label>
@@ -112,10 +165,10 @@ function ObjectDetectionSettings({
                 id="objDetectionDistanceMid"
                 min={0}
                 max={400}
-                value={objDetectionDistanceMid}
+                value={settings.midCutoff}
                 onChange={handleObjDistanceMidChange}
             />
-            <span>{objDetectionDistanceMid}</span>
+            <span>{settings.midCutoff}</span>
         </div>
         <div>
             <label htmlFor="objDetectionDistanceFar">Minimum Distance for Object Detection (Far)</label>
@@ -124,22 +177,26 @@ function ObjectDetectionSettings({
                 id="objDetectionDistanceFar"
                 min={0}
                 max={400}
-                value={objDetectionDistanceFar}
+                value={settings.farCutoff}
                 onChange={handleObjDistanceFarChange}
             />
-            <span>{objDetectionDistanceFar}</span>
+            <span>{settings.farCutoff}</span>
         </div>
             
         <div className="hapticFeedbackToggle-container">
             <div className="text-container">
-            <p>{isHapticFeedbackToggled ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
+            <p>{settings.isHapticOn ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
             </div>
             <label className="switch">
-            <input type="checkbox" checked={isHapticFeedbackToggled} onChange={handlehapticFeedbackToggle} />
+            <input type="checkbox" checked={settings.isHapticOn} onChange={handlehapticFeedbackToggle} />
             <span className="slider"></span>
             </label>
         </div>
-        <button onClick={() => handleSubmit(objDetectionDistanceNear, objDetectionDistanceMid, objDetectionDistanceFar, isHapticFeedbackToggled)}>Submit</button>
+        <button onClick={async() => {
+            await submitSettingsUpdateRequest(settings)
+                .then(res => console.log("sucessfully submited and updated settings"))
+                .catch(err => console.log("Could not submit and update settings"));
+            }}>Submit</button>
         </div>
     );
 }

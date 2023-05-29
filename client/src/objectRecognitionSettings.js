@@ -1,78 +1,101 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
+import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
+import { recognizableObjects } from './constants/recognizableObjects';
 
 function ObjectRecognitionSettings({
   socket,
-  onSettingsChange
+  onSettingsChange,
+  onVoiceCommandError
 }) {
 
+  const newVoiceSettings = useLocation().state;
 
 
-  const recognizable_objects = 
-    ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "hat", "backpack", "umbrella", "shoe", "eye glasses", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "plate", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "mirror", "dining table", "window", "desk", "toilet", "door", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush", "hair brush"]
+  const [settings, setSettings] = useState({
+    isAudioOn: localStorage.getItem('isAudioOn') ? JSON.parse(localStorage.getItem('isAudioOn')) : true,
+    volumeControl: localStorage.getItem('volumeControl') ? parseInt(localStorage.getItem('volumeControl')) : 100,
+    minDistAudio: localStorage.getItem('minimumDistanceForAudio') ? parseInt(localStorage.getItem('minimumDistanceForAudio')) : 500,
+    objsPriority: localStorage.getItem('rowStates') ? JSON.parse(localStorage.getItem('rowStates')) : Array(recognizableObjects.length).fill(0),
+    voiceGender: localStorage.getItem('voiceGender') ? localStorage.getItem('voiceGender') : "male",
+    audioPlaybackTime: localStorage.getItem('audioPlaybackTime') ? parseInt(localStorage.getItem('audioPlaybackTime')) : 5
+  });
 
-  const [VolumeControl, setVolumeControl] = useState(100);
-  const [MinimumDistanceForAudio, setMinimumDistanceForAudio] = useState(500);
-  const [isObjectRecognitionAudioToggled, setisObjectRecognitionAudioToggled] = useState(
-    localStorage.getItem('ObjectRecognitionAudioToggled') === 'true');
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [rowStates, setRowStates] = useState(Array(recognizable_objects.length).fill(0));
-  const [voiceGender, setVoiceGender] = useState('');
-  const [audioPlaybackTime, setAudioPlaybackTime] = useState('');
-
-  const settings = [VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled, menuOpen, rowStates, voiceGender, audioPlaybackTime];
 
   useEffect(() => {
     onSettingsChange("objectRecognition",
-      `Volume for Audio Outputs: ${VolumeControl}. 
-      Object recognition audio: ${isObjectRecognitionAudioToggled ? `enabled` : `disabled`}.
-      Current audio voice: ${voiceGender},
+      `Volume for Audio Outputs: ${settings.volumeControl}. 
+      Object recognition audio: ${settings.isAudioOn ? `enabled` : `disabled`}.
+      Current audio voice: ${settings.voiceGender},
       Objects to recognize: person, car, bicycle, and more. To list all objects, say: list my objects. 
         You can also set priority for different objects. To set priority, say: set priority of object to number
-      Audio playback time interval: ${audioPlaybackTime}`);
-  }, settings);
-  
-  // Volume and Distance Slider Controls
-  useEffect(() => {
-    const volume = localStorage.getItem('VolumeControl');
-    if (volume) {
-      setVolumeControl(parseInt(volume));
-    }
-    const minDistStoredValue = localStorage.getItem('MinimumDistanceForAudio');
-    if (minDistStoredValue) {
-      setMinimumDistanceForAudio(parseInt(minDistStoredValue));
-    }
-  }, [VolumeControl, MinimumDistanceForAudio]);
+      Audio playback time interval: ${settings.audioPlaybackTime}`);
+  }, [settings]);
 
-  // Object Recognition Audio Toggle and Gender
-  useEffect(() => {
-    localStorage.setItem('ObjectRecognitionAudioToggled', isObjectRecognitionAudioToggled);
-    const gender = localStorage.getItem('VoiceGender');
-    if (gender) {
-      setVoiceGender(gender);
-    }
-  }, [isObjectRecognitionAudioToggled, voiceGender]);
-  
-  // Object Recognition Menu
-  useEffect(() => {
-    const storedRowStates = localStorage.getItem('rowStates');
-    if (storedRowStates) {
-      setRowStates(JSON.parse(storedRowStates));
-    }
-  }, []);
 
-  // Audio Playback Control
   useEffect(() => {
-    const storedAudioPlaybackTime= localStorage.getItem('audioPlaybackTime');
-    if (storedAudioPlaybackTime) {
-      setAudioPlaybackTime(storedAudioPlaybackTime);
+
+    const updateSettings = async() => {
+      window.history.replaceState({}, document.title)
+      console.log("receiving new settings via voice commands");
+      console.log(newVoiceSettings);
+      onVoiceCommandError("");
+      console.log("Sending settings to pi");
+      const {volumeControl = null, isAudioOn = null, voiceGender = null, object = null, newPriority = null, audioPlaybackTime = null} = newVoiceSettings ?? {};
+      let newPrios = [];
+      if (object) {
+        console.log(object);
+        newPrios = [...settings.objsPriority];
+        newPrios[recognizableObjects.indexOf(object)] = newPriority
+      }
+
+      const newSettings = {
+        volumeControl: volumeControl ? volumeControl : settings.volumeControl,
+        isAudioOn: isAudioOn != null ? isAudioOn : settings.isAudioOn,
+        minDistAudio: settings.minDistAudio,
+        objsPriority: object ? newPrios : settings.objsPriority,
+        voiceGender: voiceGender ? voiceGender : settings.voiceGender,
+        audioPlaybackTime: audioPlaybackTime ? audioPlaybackTime : settings.audioPlaybackTime
+      }
+    
+      console.log(`new setings`);
+      console.log(newSettings);
+      // submit request to rasp pi first, and only update u.i on successfully changing settings
+      await sendSeeRequest(socket, {
+        service_name: "object-recognition-settings",
+        newSettings: newSettings
+      }).then(res => {
+          console.log("received response");
+          setSettings(newSettings);
+          setAllLocalStorageSettings(newSettings);
+          }
+        )
+        .catch((err) => {
+          console.log("WHYY");
+          onVoiceCommandError("Could not update object recognition settings. Please try again")});
     }
-  }, [audioPlaybackTime]);
+
+    if (socket.connected) {
+      updateSettings();
+    } else {
+      setTimeout(() => {
+        console.log("retrying");
+        updateSettings();
+      }, 1000);
+    }
+    
+  }, [newVoiceSettings])
 
   const handleVolumeControl = (event) => {
-    const value = parseInt(event.target.value);
-    setVolumeControl(value);
-    // Store the value in local storage when it changes
-    localStorage.setItem('VolumeControl', value.toString());
+    console.log(event.target.value);
+    const value = event.target.value;
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      volumeControl: value
+    }));
+    localStorage.setItem('volumeControl', value);
   };
 
   // const handleMinimumDistanceForAudio = (event) => {
@@ -83,13 +106,21 @@ function ObjectRecognitionSettings({
   // };
 
   const handleobjectRecognitionAudioToggled = () => {
-      setisObjectRecognitionAudioToggled((isObjectRecognitionAudioToggled) => !isObjectRecognitionAudioToggled);
+      console.log("setting toggle to " + !settings.isAudioOn);
+      localStorage.setItem('isAudioOn', !settings.isAudioOn);
+      setSettings(prevSettings => ({
+        ...prevSettings,
+        isAudioOn: !prevSettings.isAudioOn
+      }));
   };
 
-  const handleVoiceGenderSelect = (option) => {
-    setVoiceGender(option);
+  const handleVoiceGenderSelect = (newGender) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      voiceGender: newGender
+    }));
     // Store the value in local storage when it changes
-    localStorage.setItem('VoiceGender', option);
+    localStorage.setItem('voiceGender', newGender);
   };
 
   const toggleObjectRecognitionMenu = () => {
@@ -97,43 +128,54 @@ function ObjectRecognitionSettings({
   };
 
   const handleSliderChange = (index, value) => {
-    const newRowStates = [...rowStates];
+    const newRowStates = [...settings.objsPriority];
     newRowStates[index] = value;
-    setRowStates(newRowStates);
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      objsPriority: newRowStates
+    }));
     localStorage.setItem('rowStates', JSON.stringify(newRowStates));
   };
 
   function getMapOfStates(rowStates){
     const my_map = new Map()
-    for (let i = 0; i < recognizable_objects.length; i++) {
+    for (let i = 0; i < recognizableObjects.length; i++) {
       if (rowStates[i]) {
-        my_map[recognizable_objects[i]] = rowStates[i]
+        my_map[recognizableObjects[i]] = rowStates[i]
       }
       else {
-        my_map[recognizable_objects[i]] = 0 // default priority?
+        my_map[recognizableObjects[i]] = 0 // default priority?
       }
     }
     return my_map
   }
 
   const handleAudioPlayBack = (event) => {
-    const value = event.target.value
-    setAudioPlaybackTime(value);
+    const value = event.target.value;
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      audioPlaybackTime: parseInt(value)
+    }));
     localStorage.setItem('audioPlaybackTime', value);
   };
 
-  const handleSubmit = (newVolume, newDist, audioEnable, objRecognitionVoice, objMap, audioPlaybackTime) => {
-    console.log("Submitted object recognition settings")
-    socket.emit('see-request', {
+
+  const submitSettingsUpdateRequest = async(newSettings) => {
+    return await sendSeeRequest(socket, {
       service_name: "object-recognition-settings",
-      volume: newVolume,
-      dist: newDist,
-      audioEnable: audioEnable,
-      objRecognitionVoice: objRecognitionVoice,
-      objMap: objMap,
-      audioPlaybackTime: audioPlaybackTime
+      newSettings: newSettings
     });
-  };
+  }
+
+  const handleSubmitButton = async() => {
+
+  }
+
+  const setAllLocalStorageSettings = (newSettings) => {
+    for (let setting in newSettings) {
+      localStorage.setItem(setting, newSettings[setting]);
+    }
+  }
   
   return (
     <div>
@@ -144,10 +186,10 @@ function ObjectRecognitionSettings({
           id="VolumeControl"
           min={0}
           max={100}
-          value={VolumeControl}
+          value={settings.volumeControl}
           onChange={handleVolumeControl}
         />
-        <span>{VolumeControl}</span>
+        <span>{settings.VolumeControl}</span>
     </div>
           
     {/* <div>
@@ -165,24 +207,24 @@ function ObjectRecognitionSettings({
 
       <div className="objectRecognitionAudioToggled-container">
       <div className="text-container">
-        <p>{isObjectRecognitionAudioToggled ? 'Object recognition audio is enabled' : 'Object recognition audio is disabled'}</p>
+        <p>{settings.isAudioOn ? 'Object recognition audio is enabled' : 'Object recognition audio is disabled'}</p>
       </div>
       <label className="switch">
-        <input type="checkbox" checked={isObjectRecognitionAudioToggled} onChange={handleobjectRecognitionAudioToggled} />
+        <input type="checkbox" checked={settings.isAudioOn} onChange={handleobjectRecognitionAudioToggled} />
         <span className="slider"></span>
       </label>
     </div>
           
     <div>
-        <p>Current Audio Voice: {voiceGender}</p>
+        <p>Current Audio Voice: {settings.voiceGender}</p>
       <div className="switch-container">
         <div
-          className={`option ${voiceGender === 'Male' ? 'active' : ''}`}
+          className={`option ${settings.voiceGender === 'Male' ? 'active' : ''}`}
           onClick={() => handleVoiceGenderSelect('Male')}>
           Male Voice
         </div>
         <div
-          className={`option ${voiceGender === 'Female' ? 'active' : ''}`}
+          className={`option ${settings.voiceGender === 'Female' ? 'active' : ''}`}
           onClick={() => handleVoiceGenderSelect('Female')}>
           Female Voice
         </div>
@@ -194,17 +236,17 @@ function ObjectRecognitionSettings({
         {menuOpen && (
         <div className="popup-container">
             <div className="menu-content">
-            {recognizable_objects.map((object, index) => (
+            {recognizableObjects.map((object, index) => (
               <div key={index} className="row">
                 <span className="label">What priority should {object} have?</span>
                 <input
                   type="range"
                   min={0}
                   max={10}
-                  value={rowStates[index]}
+                  value={settings.objsPriority[index]}
                   onChange={(event) => handleSliderChange(index, parseInt(event.target.value))}
                 />
-                <span className="slider-value">{rowStates[index]}</span>
+                <span className="slider-value">{settings.objsPriority[index]}</span>
               </div>
               ))}
             </div>
@@ -214,11 +256,10 @@ function ObjectRecognitionSettings({
     <div>
         <label>
           How often should the audio playback for objects recognized be relayed?
-          <input type="text" value={audioPlaybackTime} onChange={handleAudioPlayBack} />
+          <input type="text" value={settings.audioPlaybackTime} onChange={handleAudioPlayBack} />
         </label>
       </div>
-      <button onClick={() => handleSubmit(VolumeControl, MinimumDistanceForAudio, isObjectRecognitionAudioToggled,
-        voiceGender, getMapOfStates(rowStates), audioPlaybackTime)}>Submit</button>
+      <button onClick={() => submitSettingsUpdateRequest(settings)}>Submit</button>
     </div>
   );
 }

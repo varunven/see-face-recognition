@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { useLocation, useNavigate, useRoutes } from "react-router-dom";
 import { SeeRequest, sendSeeRequest } from "../utils/seeRequest";
+import { wordToNum, recognizableObjects } from "../constants/recognizableObjects";
 
 const SpeechListener = ({
     socket,
@@ -50,20 +51,37 @@ const SpeechListener = ({
             callback: (action) => handleToggleRecognitionAudio(action)
         },
 
+        
+        {
+            command: "change volume to :newVolume",
+            callback: (newVolume) => changeObjRecogVolume(newVolume)
+        },
+
         {
             command: "change voice to :gender",
             callback: (gender) => changeVoice(gender)
         },
 
+
         {
-            command: "change object recognition volume",
-            callback: () => changeObjRecogVolume()
+            command: "set priority of :object to :newPriority",
+            callback: (object, newPriority) => changeObjectPriority(object, newPriority)
         },
 
         {
-            command: "change object recognition minimum distance",
-            callback: () => changeObjRecogMinDist()
-        }
+            command: "set audio playback time to :newAudioInterval",
+            callback: (newAudioInterval) => changeAudioPlaybackInterval(newAudioInterval)
+        },
+
+        {
+            command: "set minimum distance for :proximity proximity to :newDistance",
+            callback: (proximity, newDistance) => changeProximityThresholds(proximity, newDistance)
+        },
+
+        {
+            command: ":action haptic feedback",
+            callback: (action) => handleToggleHapticFeedback(action)
+        },
 
 
     ]
@@ -77,11 +95,12 @@ const SpeechListener = ({
 
     
     useEffect(() => {
-        SpeechRecognition.startListening({ continuous: true });
+        let speechRecog;
+        const startListening = async() => {
+            return await SpeechRecognition.startListening({ continuous: true });
+        }
 
-        // return () => {
-        //     SpeechRecognition.abortListening();
-        // };
+        speechRecog = startListening();
 
     }, []);
 
@@ -95,7 +114,6 @@ const SpeechListener = ({
 
 
     const activateListener = () => {
-        console.log("Starting to Listen!");
         setIsListening(true);
     }
 
@@ -106,6 +124,7 @@ const SpeechListener = ({
             readText = 
             `You are in the home page. 
                 Pages: 
+                    Home
                     Object Recognition Settings. 
                     Object Detection Settings. 
                     Change Faces. 
@@ -146,11 +165,11 @@ const SpeechListener = ({
             textToSpeak = 
             `
                 enable/disable recognition audio.
-                change recognition audio volume to [value].
-                change recognition audio voice to male/female.
+                change volume to [value].
+                change voice to male/female.
                 list my objects.
                 set priority of [object] to [value] (from 1 to 10)
-                set recognition audio playback time interval to [value]
+                set audio playback time to [value]
             `
         } else if (commandGroup.includes("detection")) {
             textToSpeak = 
@@ -187,26 +206,134 @@ const SpeechListener = ({
     }
 
     const handleToggleRecognitionAudio = async(action) => {
-        handleSpeak(`Turning audio ${action == "enable" ? "on" : "off"}`);
-        await sendSeeRequest(socket, new SeeRequest("audio-settings", "toggleAudio", action == "enable"))
-            .then(res => console.log(res))
-            .catch(error => handleSpeak(error));
+        if (action == 'enable' || action == 'disable') {
+            handleSpeak(`Turning audio ${action == "enable" ? "on" : "off"}`);
+            navigate("/object-recognition", {
+                state: {
+                    isAudioOn: action == "enable"
+                }
+            });
+        } else {
+            handleSpeak("Say enable or disable haptic feedback to configure haptic feedback");
+        }
     }
 
-    const changeObjRecogVolume = () => {
-        console.log("changing obj recog volume");
+    const changeObjRecogVolume = (newVolume) => {
+        const vol = parseInt(newVolume);
+        if (vol >= 0 && vol <= 100) {
+            handleSpeak(`Setting volume to ${vol}`);
+            navigate("/object-recognition", {
+                state: {
+                    volumeControl: vol
+                }
+            });
+        } else {
+            handleSpeak("Volume must be between 0 and 100");
+        }
+    }
+
+    const changeVoice = (newGender) => {
+        if (newGender == "male" || newGender == "female") {
+            handleSpeak(`Changing audio voice to ${newGender}`);
+            navigate("/object-recognition", {
+                state: {
+                    voiceGender: newGender
+                }
+            });
+        } else {
+            handleSpeak("Supported text to speech voices are male and female")
+        }
     }
 
     const changeObjRecogMinDist = () => {
         console.log("changing obj recog min distance");
     }
 
-    const disableObjRecogAudio = () => {
+    const changeObjectPriority = (object, newPriority) => {
+        const prio = parseNumberFromText(newPriority);
+        if (!prio) {
 
+        }
+        if (recognizableObjects.includes(object)) {
+            if (prio >= 0 && prio <= 10) {
+                handleSpeak(`Setting priority of ${object} to ${prio}`);
+                navigate("/object-recognition", {
+                    state: {
+                        object: object,
+                        newPriority: prio
+                    }
+                });
+            } else {
+                handleSpeak("Priority must be between 0 and 10");
+            }
+        } else {
+            handleSpeak(`${object} is not a recognizable object. For a list of recognizable objects, say: list my objects`);
+        }
     }
 
-    const changeVoice = () => {
+    const changeAudioPlaybackInterval = (newAudioInterval) => {
+        const interval = parseNumberFromText(newAudioInterval);
+        if (interval >= 0 && interval <= 30) {
+            handleSpeak(`Setting audio playback time to ${newAudioInterval} seconds`);
+            navigate("/object-recognition", {
+                state: {
+                    audioPlaybackTime: interval
+                }
+            });
+        } else {
+            handleSpeak("Playback time must be between 0 and 30 seconds");
+        }
+    }
 
+    const changeProximityThresholds = (proximity, newDistance) => {
+        let thresh = parseNumberFromText(newDistance);
+        const newState = {
+
+        };
+
+        if (proximity == "close" || proximity == "medium" || proximity == "distant") {
+            handleSpeak(`Setting minimum distance for ${proximity} proximity to ${thresh}`);
+            if (proximity == "close") {
+                newState.nearCutoff = thresh;
+            } else if (proximity == "medium") {
+                newState.midCutoff = thresh;
+            } else {
+                newState.farCutoff = thresh;
+            }
+            navigate("/object-detection", {
+                state: newState
+            });
+        } else {
+            handleSpeak(`Supported proximities are close, medium, and distant.`);
+        }
+    }
+
+     const handleToggleHapticFeedback = (action) => {
+        if (action == 'enable' || action == 'disable') {
+            handleSpeak(`Turning haptic feedback ${action == "enable" ? "on" : "off"}`);
+            navigate("/object-detection", {
+                state: {
+                    isHapticOn: action == "enable"
+                }
+            });
+        } else {
+            handleSpeak("Say enable or disable haptic feedback to configure haptic feedback");
+        }
+     }
+
+
+
+
+
+
+
+    // attempts to parse a string to a number
+    const parseNumberFromText = (number) => {
+        let num = parseInt(number);
+        if (!num) {
+            num = wordToNum[number.toLowerCase()]
+        }
+        return num;
     }
 
 
