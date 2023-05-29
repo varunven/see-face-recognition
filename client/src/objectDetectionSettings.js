@@ -90,7 +90,7 @@ function ObjectDetectionSettings({
 
         setSettings(prevSettings => ({
             ...prevSettings,
-            nearCutoff: newMidValue,
+            midCutoff: newMidValue,
         }));
         // Store the value in local storage when it changes
         localStorage.setItem('midCutOff', newMidValue);
@@ -135,7 +135,7 @@ function ObjectDetectionSettings({
         //     objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
         //     setObjDetectionDistanceFar(objDetectionDistanceFar);
         // }
-        await submitSettingsUpdateRequest(newSettings);
+        return await submitSettingsUpdateRequest(newSettings);
     };
 
     const setAllLocalStorageSettings = (newSettings) => {
@@ -193,7 +193,7 @@ function ObjectDetectionSettings({
             </label>
         </div>
         <button onClick={async() => {
-            await submitSettingsUpdateRequest(settings)
+            await handleSubmit(settings)
                 .then(res => console.log("sucessfully submited and updated settings"))
                 .catch(err => console.log("Could not submit and update settings"));
             }}>Submit</button>
