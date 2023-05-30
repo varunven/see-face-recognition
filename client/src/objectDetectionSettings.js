@@ -58,7 +58,7 @@ function ObjectDetectionSettings({
               }
             )
             .catch((err) => {
-              console.log("WHYY");
+              console.log(err);
               onVoiceCommandError("Could not update object detection settings. Please try again")});
         }
     
@@ -116,27 +116,13 @@ function ObjectDetectionSettings({
         }));
     };
 
-    const submitSettingsUpdateRequest = async(newSettings) => {
+    const submitSettingsUpdateRequest = async (newSettings) => {
+        console.log("Submitted object detection settings")
         return await sendSeeRequest(socket, {
           service_name: "object-detection-settings",
           newSettings: newSettings
         });
       }
-    
-    const handleSubmit = async(newSettings) => {
-        console.log("Submitted object detection settings")
-        // if (objDetectionDistanceNear > objDetectionDistanceMid) {
-        //     objDetectionDistanceMid = objDetectionDistanceNear + 1
-        //     objDetectionDistanceMid = Math.min(objDetectionDistanceMid, 400)
-        //     setObjDetectionDistanceMid(objDetectionDistanceMid);
-        // }
-        // if (objDetectionDistanceMid > objDetectionDistanceFar) {
-        //     objDetectionDistanceFar = objDetectionDistanceMid + 1
-        //     objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
-        //     setObjDetectionDistanceFar(objDetectionDistanceFar);
-        // }
-        return await submitSettingsUpdateRequest(newSettings);
-    };
 
     const setAllLocalStorageSettings = (newSettings) => {
         for (let setting in newSettings) {
@@ -192,11 +178,7 @@ function ObjectDetectionSettings({
             <span className="slider"></span>
             </label>
         </div>
-        <button onClick={async() => {
-            await handleSubmit(settings)
-                .then(res => console.log("sucessfully submited and updated settings"))
-                .catch(err => console.log("Could not submit and update settings"));
-            }}>Submit</button>
+        <button onClick={() => submitSettingsUpdateRequest(settings)}>Submit</button>
         </div>
     );
 }

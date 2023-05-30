@@ -45,20 +45,6 @@ function App() {
     }));
   }
 
-
-  // const updateObjectRecognitionSettings = (audioVol, isAudioOn, voiceGender, objsToRecognize, audioPlaybackTime) => {
-  //   const newSettings = {
-  //     audioVolume: audioVol,
-  //     isAudioOn: isAudioOn,
-  //     voiceGender: voiceGender,
-  //     objsToRecognize: objsToRecognize,
-  //     audioPlaybackTime: audioPlaybackTime
-  //   }
-
-
-
-  // }
-
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected to server');
@@ -90,7 +76,7 @@ function App() {
             <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
             <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
             <Route exact path="/change-faces" element={<ChangeFaces socket={socket}/>} />
-            <Route exact path="/forget-faces" element={<ForgetFaces socket={socket}/>} />
+            <Route exact path="/forget-faces" element={<ForgetFaces socket={socket} />} />
             <Route exact path="/viewStream" element={<ViewStream />} />
           </Routes>
         </div>

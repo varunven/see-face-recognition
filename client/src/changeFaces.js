@@ -12,7 +12,8 @@ const ChangeFaces = ({socket}) => {
   // person name is name of file separated by _ --> "jason_statham" --> Jason Statham
   const nameWithoutExtension = images[currentIndex].split(".")[0]
   const newNameWithoutExtension = nameWithoutExtension.replace('/static/media/', '')
-  const [firstName, lastName] = newNameWithoutExtension.split(".")
+  const nameParams = newNameWithoutExtension.split(".")[0]
+  const [faceId, firstName, lastName] = nameParams.split("_")
 
   // Move to prev/next photo
   const handlePrev = () => {
@@ -32,11 +33,12 @@ const ChangeFaces = ({socket}) => {
     setShowOverlay(true)
   }
 
-  const handleSubmit = (fileName, newFirstName, newLastName) => {
+  const handleSubmit = (faceId, newFirstName, newLastName) => {
     console.log("Sent submission change request")
+
     socket.emit('see-request', {
       service_name: "change-faces",
-      fileName: fileName,
+      faceId: faceId,
       newFirstName: newFirstName,
       newLastName: newLastName
      })
@@ -52,6 +54,28 @@ const ChangeFaces = ({socket}) => {
     }
   }, [currentIndex])
 
+  //TODO on raspi:
+  // Send array of image data through socket
+  // for image_path in file_folder:
+    // with open(image_path, 'rb') as file:
+    //     image_data = file.read()
+  //      arr.append((faceId, firstName, lastName, image_data))
+  // socket.emit('add-face', arr)
+
+  //TODO on server:
+  // io.on('connection', (socket) => {
+  //   socket.on('add-face', (fileaudio, faceId, imageData) => {    
+  //   io.emit('image-data', { fileaudio, faceId, imageData});
+  //   });
+  // });
+
+  //TODO on client side:
+  // socket.on('add-face', (data) => {
+  //   const { fileaudio, faceId, imageUrl } = data;
+  //   display arr imagedata and if pressed, then play fileaudio
+  // });
+
+  //TODO on server: do the inbetween
   return (
     <div className="gallery">
       <div className="image-container">
@@ -78,7 +102,7 @@ const ChangeFaces = ({socket}) => {
               value={newLastName}
               onChange={(e) => setLastName(e.target.value)}
             />
-            <button onClick={() => handleSubmit(newNameWithoutExtension, newFirstName, newLastName)}>Submit</button>
+            <button onClick={() => handleSubmit(faceId, newFirstName, newLastName)}>Submit</button>
           </div>
         </div>
         )}

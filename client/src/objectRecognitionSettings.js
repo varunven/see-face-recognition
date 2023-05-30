@@ -15,7 +15,6 @@ function ObjectRecognitionSettings({
   const [settings, setSettings] = useState({
     isAudioOn: localStorage.getItem('isAudioOn') ? JSON.parse(localStorage.getItem('isAudioOn')) : true,
     volumeControl: localStorage.getItem('volumeControl') ? parseInt(localStorage.getItem('volumeControl')) : 100,
-    minDistAudio: localStorage.getItem('minimumDistanceForAudio') ? parseInt(localStorage.getItem('minimumDistanceForAudio')) : 500,
     objsPriority: localStorage.getItem('rowStates') ? JSON.parse(localStorage.getItem('rowStates')) : Array(recognizableObjects.length).fill(0),
     voiceGender: localStorage.getItem('voiceGender') ? localStorage.getItem('voiceGender') : "male",
     audioPlaybackTime: localStorage.getItem('audioPlaybackTime') ? parseInt(localStorage.getItem('audioPlaybackTime')) : 5
@@ -54,8 +53,7 @@ function ObjectRecognitionSettings({
       const newSettings = {
         volumeControl: volumeControl ? volumeControl : settings.volumeControl,
         isAudioOn: isAudioOn != null ? isAudioOn : settings.isAudioOn,
-        minDistAudio: settings.minDistAudio,
-        objsPriority: object ? newPrios : settings.objsPriority,
+        objsPriority: object ? newPrios : getMapOfStates(settings.objsPriority),
         voiceGender: voiceGender ? voiceGender : settings.voiceGender,
         audioPlaybackTime: audioPlaybackTime ? audioPlaybackTime : settings.audioPlaybackTime
       }
@@ -97,13 +95,6 @@ function ObjectRecognitionSettings({
     }));
     localStorage.setItem('volumeControl', value);
   };
-
-  // const handleMinimumDistanceForAudio = (event) => {
-  //     const value = parseInt(event.target.value);
-  //     setMinimumDistanceForAudio(value);
-  //     // Store the value in local storage when it changes
-  //     localStorage.setItem('MinimumDistanceForAudio', value.toString());
-  // };
 
   const handleobjectRecognitionAudioToggled = () => {
       console.log("setting toggle to " + !settings.isAudioOn);
@@ -160,15 +151,12 @@ function ObjectRecognitionSettings({
   };
 
 
-  const submitSettingsUpdateRequest = async(newSettings) => {
+  const submitSettingsUpdateRequest = async (newSettings) => {
+    console.log("Submitted object recognition settings")
     return await sendSeeRequest(socket, {
       service_name: "object-recognition-settings",
       newSettings: newSettings
     });
-  }
-
-  const handleSubmitButton = async() => {
-
   }
 
   const setAllLocalStorageSettings = (newSettings) => {
@@ -191,19 +179,6 @@ function ObjectRecognitionSettings({
         />
         <span>{settings.VolumeControl}</span>
     </div>
-          
-    {/* <div>
-      <label htmlFor="MinimumDistanceForAudio">Minimum Distance for Recognized Object Audio Queues</label>
-        <input
-          type="range"
-          id="MinimumDistanceForAudio"
-          min={0}
-          max={500.0}
-          value={MinimumDistanceForAudio}
-          onChange={handleMinimumDistanceForAudio}
-        />
-        <span>{MinimumDistanceForAudio}</span>
-      </div> */}
 
       <div className="objectRecognitionAudioToggled-container">
       <div className="text-container">
