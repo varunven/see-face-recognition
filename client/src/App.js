@@ -11,8 +11,7 @@ import ViewStream from './pages/ViewStream';
 import SpeechSynthesis from './components/SpeechSynthesis';
 import SpeechListener from './components/SpeechListener';
 import SpeechAssistant from './components/SpeechAssistant';
-import loading from './assets/gray-nbg.gif';
-import SeeAnimated from './components/SeeAnimated/SeeAnimated';
+import Navbar from './components/Navbar/Navbar';
 
 const server_url = 'https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-free.app'
 // const server_url = 'http://localhost:3001'
@@ -62,6 +61,7 @@ function App() {
 
   return (
     <Router>
+              <Navbar/>
       <div className="App">
         <div className="Menu">
           <SpeechAssistant socket={socket} allPagesText={allPagesText} voiceError={voiceCommandError}></SpeechAssistant>

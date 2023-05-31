@@ -1,6 +1,7 @@
 import "./SpeechCue.css";
 import siri from "../../assets/see-anim.gif";
 import { useState, useEffect, useRef } from "react";
+import SeeAnimated from "../SeeAnimated/SeeAnimated";
 
 const SpeechCue = ({
     active,
@@ -20,7 +21,11 @@ const SpeechCue = ({
 
     return (
         <div className={speechTag == 0 ? `cue-container` : `cue-container-${active ? 'active' : `inactive`}`}>
-            <img className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}src={siri}></img>
+            {/* <img className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}src={siri}></img> */}
+            <div className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}>
+                <SeeAnimated></SeeAnimated>
+            </div>
+
         </div>
     )
 

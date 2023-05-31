@@ -103,12 +103,7 @@ const SpeechListener = ({
             console.log(x);
         }
 
-        console.log(listening);
-        speechRecog = startListening();
-
-        // return () => {
-        //     SpeechRecognition.abortListening();
-        // }
+        const x = startListening();
 
     }, []);
 
