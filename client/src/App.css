@@ -210,8 +210,10 @@ input:checked + .slider:before {
 
 .image-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .button-container {
@@ -228,9 +230,8 @@ input:checked + .slider:before {
 }
 
 .left-gallery-button {
-  position: absolute;
-  top: 70%;
-  left: 26%;
+  margin-top: auto;
+  margin-bottom: auto;
   font-size: 80px; /* Adjust the font size as desired */
   background-color: transparent;
   border: none;
@@ -239,9 +240,8 @@ input:checked + .slider:before {
 }
 
 .right-gallery-button {
-  position: absolute;
-  top: 70%;
-  left: 69%;
+  margin-top: auto;
+  margin-bottom: auto;
   font-size: 80px; /* Adjust the font size as desired */
   background-color: transparent;
   border: none;
@@ -265,6 +265,21 @@ input:checked + .slider:before {
   transition: background-color 0.3s;
 }
 
+.main-logo {
+  width: 40vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .option.active {
   background-color: #2196f3;
   color: #fff;
@@ -274,7 +289,12 @@ input:checked + .slider:before {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  width: 100%;
   padding: 20px;
+}
+
+.all {
+  width: 100%;
 }
 
 .white-text{

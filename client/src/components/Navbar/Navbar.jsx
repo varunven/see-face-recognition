@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import "./Navbar.css";
-import logo from "../../assets/logo-nbg.png"
+import logo from "../../assets/nav-bar-logo.png"
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faX } from "@fortawesome/free-solid-svg-icons";
@@ -26,20 +26,20 @@ const Navbar = (props) => {
             <li className={"item " + (toggle ? "active" : "")}><a>Home</a></li>
           </Link>
 
-          <Link to={'/about'}>
+          <Link to={'/object-recognition'}>
             <li className={"item " + (toggle ? "active" : "")}><a>Object Recognition Settings</a></li>
           </Link>
 
-          <Link to={'/news'}>
+          <Link to={'/object-detection'}>
             <li className={"item " + (toggle ? "active" : "")}><a>Object Detection Settings</a></li>
           </Link>
 
-          <Link to={'/products'}>
+          <Link to={'/change-faces'}>
             <li className={"item " + (toggle ? "active" : "")}><a>Learned Faces</a></li>
           </Link>
 
-          <Link to={'/contact-us'}>
-            <li className={"item " + (toggle ? "active" : "")}><a>Forget Faces</a></li>
+          <Link to={'/view-stream'}>
+            <li className={"item " + (toggle ? "active" : "")}><a>View Stream</a></li>
           </Link>
           </>
         )
@@ -51,20 +51,20 @@ const Navbar = (props) => {
               <li className={"item " + (toggle ? "active" : "")}><a>Home</a></li>
             </Link>
 
-            <Link to={'/about'}>
+            <Link to={'/object-recognition'}>
               <li className={"item " + (toggle ? "active" : "")}><a>Object Recognition Settings</a></li>
             </Link>
 
-            <Link to={'/news'}>
+            <Link to={'/object-detection'}>
               <li className={"item " + (toggle ? "active" : "")}><a>Object Detection Settings</a></li>
             </Link>
 
-            <Link to={'/products'}>
+            <Link to={'/change-faces'}>
               <li className={"item " + (toggle ? "active" : "")}><a>Learned Faces</a></li>
             </Link>
 
-            <Link to={'/contact-us'}>
-              <li className={"item " + (toggle ? "active" : "")}><a>Forget Faces</a></li>
+            <Link to={'/view-stream'}>
+              <li className={"item " + (toggle ? "active" : "")}><a>View Stream</a></li>
             </Link>
 
 

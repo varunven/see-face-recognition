@@ -4,6 +4,7 @@
   width: 90vw;
   justify-content: center;
   align-items: center;
+  height: 800px;
 }
 
 .learn-face-header {
@@ -15,4 +16,29 @@
   font-size: 30px;
   color: black;
   text-align: center;
+}
+
+.learn-face-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-face-container {
+
+}
+
+.carousel-face-img {
+  width: 300px;
+  margin-top: 10%;
+}
+
+.carousel-face-name {
+
+}
+
+.padding {
+  width: 300px;
+  height: 200px;
 }

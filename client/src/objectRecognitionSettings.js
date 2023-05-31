@@ -61,7 +61,7 @@ function ObjectRecognitionSettings({
       const newSettings = {
         volumeControl: volumeControl ? volumeControl : settings.volumeControl,
         isAudioOn: isAudioOn != null ? isAudioOn : settings.isAudioOn,
-        objsPriority: object ? newPrios : getMapOfStates(settings.objsPriority),
+        objsPriority: object ? newPrios : settings.objsPriority,
         voiceGender: voiceGender ? voiceGender : settings.voiceGender,
         audioPlaybackTime: audioPlaybackTime ? audioPlaybackTime : settings.audioPlaybackTime
       }

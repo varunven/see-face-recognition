@@ -83,6 +83,11 @@ const SpeechListener = ({
             callback: (action) => handleToggleHapticFeedback(action)
         },
 
+        {
+          command: "save face as :name",
+          callback: (name) => handleNameForFace(name)
+        }
+
 
     ]
 
@@ -103,12 +108,7 @@ const SpeechListener = ({
             console.log(x);
         }
 
-<<<<<<< HEAD
-        speechRecog = startListening();
-        changeProximityThresholds("close", 480)
-=======
         const x = startListening();
->>>>>>> d6f31125319a1d7e5bd5f20537b97d61d42e2e92
 
     }, []);
 
@@ -332,6 +332,14 @@ const SpeechListener = ({
         } else {
             handleSpeak("Say enable or disable haptic feedback to configure haptic feedback");
         }
+     }
+
+     const handleNameForFace = (name) => {
+      navigate("/change-faces", {
+        state: {
+            name: name
+        }
+    });
      }
 
 

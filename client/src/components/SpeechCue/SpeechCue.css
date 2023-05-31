@@ -3,7 +3,7 @@
     position: fixed;
     padding: 20px;
     left: 0;
-    bottom: 0;
+    bottom: 10px;
     display: flex;
     justify-content: center;
     max-height: 20vh;

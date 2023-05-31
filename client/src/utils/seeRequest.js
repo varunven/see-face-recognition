@@ -24,20 +24,28 @@ export const sendSeeRequest = (socket, data) => {
                 resolve();
             }
         });
-
-        // socket.on("see-response", (response) => {
-        //     console.log("received response from see");
-        //     clearTimeout(id);
-        //     resolve(response);
-        //     socket.off('see-response');
-        // });
-    
-        // socket.on('see-error', (error) => {
-        //     clearTimeout(id);
-        //     reject(error);
-        //     socket.off('see-error');
-        // });
       });
+}
+
+export const sendYoloRequest = (socket) => {
+  return new Promise((resolve, reject) => {
+
+      socket.timeout(7000).emit("yolo-request", (err, files, response_code) => {
+          console.log(response_code);
+          if (err) {
+              reject("Request timed out");
+          }
+
+          else if (response_code == 500) {
+              reject("Could not process request");
+          }
+
+          else if (response_code == 200) {
+              console.log("received response from SEE");
+              resolve(files);
+          }
+      });
+    });
 }
 
 export class SeeRequest {

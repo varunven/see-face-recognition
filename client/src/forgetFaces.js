@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 function ForgetFaces({ socket }) {
   const [showPopup, setShowPopup] = useState(false)
   const [passwordResult, setForgettingResult] = useState('')
+
+  useEffect(() => {
+    window.location.href = `${process.env.REACT_APP_SERVER_URL}/viewer`
+  }, []);
 
   const handleInitialButtonClick = () => {
     setShowPopup(true)
@@ -19,14 +23,14 @@ function ForgetFaces({ socket }) {
 
   return (
     <div>
-      <button onClick={handleInitialButtonClick}>Forget All Faces</button>
+      {/* <button onClick={handleInitialButtonClick}>Forget All Faces</button>
       {showPopup && (
         <div className="popup">
           <p>Forgetting faces cannot be undone! All faces will be deleted. Is this ok?</p>
           <button onClick={handlePopupButtonClick}>Confirm Forget All Faces</button>
         </div>
       )}
-      {passwordResult && <p>{passwordResult}</p>}
+      {passwordResult && <p>{passwordResult}</p>} */}
     </div>
   )
 }
