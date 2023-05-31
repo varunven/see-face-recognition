@@ -205,6 +205,19 @@ input:checked + .slider:before {
 .scaled-image {
   width: 400px; /* Adjust this percentage as per your needs */
   height: 400px; /* Preserve aspect ratio */
+  padding-left: 35px;
+}
+
+.image-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.button-container {
+  margin-top: 10px;
 }
 
 .gallery-container {
@@ -217,11 +230,9 @@ input:checked + .slider:before {
 }
 
 .left-gallery-button {
-  position: absolute;
-  top: 70%;
-  left: 26%;
+  margin-top: auto;
+  margin-bottom: auto;
   font-size: 80px; /* Adjust the font size as desired */
-  padding: 10px; /* Adjust the button padding as desired */
   background-color: transparent;
   border: none;
   color: #000; /* Adjust the button color as desired */
@@ -229,11 +240,9 @@ input:checked + .slider:before {
 }
 
 .right-gallery-button {
-  position: absolute;
-  top: 70%;
-  left: 69%;
+  margin-top: auto;
+  margin-bottom: auto;
   font-size: 80px; /* Adjust the font size as desired */
-  padding: 10px; /* Adjust the button padding as desired */
   background-color: transparent;
   border: none;
   color: #000; /* Adjust the button color as desired */
@@ -256,22 +265,74 @@ input:checked + .slider:before {
   transition: background-color 0.3s;
 }
 
+.main-logo {
+  width: 40vw;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .option.active {
   background-color: #2196f3;
   color: #fff;
 }
 
 .text-logo-container {
-  background-image: url('./logo.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  width: 100%;
   padding: 20px;
+}
+
+.all {
+  width: 100%;
 }
 
 .white-text{
   color: #fff;
   font-size: 200%;
   font-family: "Lucida Console", "Courier New", monospace;
+}
+
+/* ...existing CSS code... */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px; /* Increase the height of the range */
+  background-color: #ccc;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+  border-radius: 10px;
+  margin-top: 10px; /* Add spacing between the sliders */
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px; /* Increase the width of the thumb */
+  height: 30px; /* Increase the height of the thumb */
+  background-color: #2196f3;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 30px; /* Increase the width of the thumb */
+  height: 30px; /* Increase the height of the thumb */
+  background-color: #2196f3;
+  cursor: pointer;
+  border-radius: 50%;
 }
 

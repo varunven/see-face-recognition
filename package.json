@@ -4,7 +4,7 @@
   "description": "A web app used in combination with the S.E.E. glasses to identify faces in front of the user",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,10 +18,8 @@
   },
   "homepage": "https://github.com/varunven/see-face-recognition#readme",
   "dependencies": {
-    "express": "^4.18.2"
-  },
-  "scripts": {
-    "start": "node server/index.js"
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
   },
   "proxy": "http://localhost:3001"
 }
