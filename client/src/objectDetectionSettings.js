@@ -100,6 +100,7 @@ function ObjectDetectionSettings({
               }
             )
             .catch((err) => {
+              console.log(err);
               onVoiceCommandError("Could not update object detection settings. Please try again")});
         }
     
@@ -178,7 +179,8 @@ function ObjectDetectionSettings({
         }));
     };
 
-    const submitSettingsUpdateRequest = async(newSettings) => {
+    const submitSettingsUpdateRequest = async (newSettings) => {
+        console.log("Submitted object detection settings")
         return await sendSeeRequest(socket, {
           service_name: "object-detection-settings",
           newSettings: newSettings

@@ -24,7 +24,8 @@ const ChangeFaces = ({
   // person name is name of file separated by _ --> "jason_statham" --> Jason Statham
   const nameWithoutExtension = images[currentIndex].split(".")[0]
   const newNameWithoutExtension = nameWithoutExtension.replace('/static/media/', '')
-  const [firstName, lastName] = newNameWithoutExtension.split(".")
+  const nameParams = newNameWithoutExtension.split(".")[0]
+  const [faceId, firstName, lastName] = nameParams.split("_")
 
   useEffect(() => {
     console.log("new face incoming");
@@ -118,11 +119,12 @@ const ChangeFaces = ({
     setShowOverlay(true)
   }
 
-  const handleSubmit = (fileName, newFirstName, newLastName) => {
+  const handleSubmit = (faceId, newFirstName, newLastName) => {
     console.log("Sent submission change request")
+
     socket.emit('see-request', {
       service_name: "change-faces",
-      fileName: fileName,
+      faceId: faceId,
       newFirstName: newFirstName,
       newLastName: newLastName
      })
@@ -148,6 +150,7 @@ const ChangeFaces = ({
     }
   }, [currentIndex])
 
+<<<<<<< HEAD
   if (learnFaceView) {
     return(
       <div className='learn-face-container'>
@@ -164,9 +167,38 @@ const ChangeFaces = ({
         />
         <button onClick={handleSaveFace}>
           Save Face
+=======
+  //TODO on raspi:
+  // Send face id through socket to server
+  // socket.emit('add-face', faceid) when learn face is pressed
+
+  //TODO on server:
+  // io.on('connection', (socket) => {
+  //   socket.on('add-face', ( imageurl) => { (to web client)   
+  //   io.emit('add-face', { firstname, lastname }); (back to pi)
+    //  save the img with face id at the time as firstname_lastname_faceid.png
+  //   });
+  // });
+
+  //TODO on web client side:
+  // socket.on('add-face', (imageurl) => {
+  //   get a pop up of image, say this is face id --> what should their name be?
+  //  send back faceid, firstname, lastname
+  // });
+
+  //TODO on server: do the inbetween
+  
+  // have get all images to show all learned faces with their names
+  return (
+    <div className="gallery">
+      <div className="image-container">
+        <button className="left-gallery-button" onClick={handlePrev}>
+        {"\u2190"} {/* Left arrow symbol */}
+>>>>>>> d6f31125319a1d7e5bd5f20537b97d61d42e2e92
         </button>
           
         </div>
+<<<<<<< HEAD
 
       </div>
     )
@@ -199,6 +231,23 @@ const ChangeFaces = ({
               />
               <button onClick={() => handleSubmit(newNameWithoutExtension, newFirstName, newLastName)}>Submit</button>
             </div>
+=======
+        {showOverlay && (
+        <div className="overlay">
+          <div className="overlay-content">
+              <h2>What should this person be renamed?</h2>
+            <input
+              type="text"
+              value={newFirstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              type="text"
+              value={newLastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <button onClick={() => handleSubmit(faceId, newFirstName, newLastName)}>Submit</button>
+>>>>>>> d6f31125319a1d7e5bd5f20537b97d61d42e2e92
           </div>
         )}
 

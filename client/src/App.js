@@ -11,6 +11,7 @@ import ViewStream from './pages/ViewStream';
 import SpeechSynthesis from './components/SpeechSynthesis';
 import SpeechListener from './components/SpeechListener';
 import SpeechAssistant from './components/SpeechAssistant';
+import Navbar from './components/Navbar/Navbar';
 
 const server_url = 'https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-free.app'
 // const server_url = 'http://localhost:3001'
@@ -59,7 +60,10 @@ function App() {
     }));
   }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d6f31125319a1d7e5bd5f20537b97d61d42e2e92
   useEffect(() => {
     socket.on('connect', () => {
       console.log(`Connected to server, socket = ${socket.id}`);
@@ -83,23 +87,32 @@ function App() {
 
   return (
     <Router>
+              <Navbar/>
       <div className="App">
         <div className="Menu">
           <SpeechAssistant socket={socket} allPagesText={allPagesText} voiceError={voiceCommandError}></SpeechAssistant>
           <Link to="/" className="MenuItem">Home</Link>
           <Link to="/object-recognition" className="MenuItem">Object Recognition Settings</Link>
           <Link to="/object-detection" className="MenuItem">Object Detection Settings</Link>
-          <Link to="/change-faces" className="MenuItem">Change Faces</Link>
+          <Link to="/change-faces" className="MenuItem">Learned Faces</Link>
           <Link to="/forget-faces" className="MenuItem">Forget Faces</Link>
         </div>
 
         <div>
           <Routes>
+<<<<<<< HEAD
             <Route exact path="/" element={<Home learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError} learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError} learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/change-faces" element={<ChangeFaces socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/forget-faces" element={<ForgetFaces socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
+=======
+            <Route exact path="/" element={<Home />} />
+            <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
+            <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
+            <Route exact path="/change-faces" element={<ChangeFaces socket={socket}/>} />
+            <Route exact path="/forget-faces" element={<ForgetFaces socket={socket} />} />
+>>>>>>> d6f31125319a1d7e5bd5f20537b97d61d42e2e92
             <Route exact path="/viewStream" element={<ViewStream />} />
           </Routes>
         </div>
