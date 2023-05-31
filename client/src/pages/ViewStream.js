@@ -19,7 +19,7 @@ const ViewStream = () => {
     useEffect(() => {
 
         console.log(process.env.REACT_APP_SERVER_URL);
-        const socket = io(process.env.REACT_APP_SERVER_URL, { transports: ['websocket', 'polling', 'flashsocket'] });
+        const socket = io('https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-free.app', { transports: ['websocket', 'polling', 'flashsocket'] });
 
         setViewerSocket(socket);
 
@@ -119,7 +119,7 @@ const ViewStream = () => {
         };
     
         try {
-            const { data } = await axios.post(`${process.env.REACT_APP_SERVER_URL}/consumer`, payload);
+            const { data } = await axios.post(`https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-free.app/consumer`, payload);
             const desc = new RTCSessionDescription({sdp: data.sdp, type: data.type});
             peer.setRemoteDescription(desc).catch(e => console.log(e));
             //document.getElementById("err-msg").innerText = "";

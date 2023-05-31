@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { io } from "socket.io-client";
 
 import ForgetFaces from "./forgetFaces"
@@ -16,7 +16,20 @@ const server_url = 'https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-fr
 // const server_url = 'http://localhost:3001'
 const socket = io(server_url, { transports: ['websocket', 'polling', 'flashsocket'] });
 
-function Home() {
+function Home({
+  learnedFaceEvent
+}) {
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (learnedFaceEvent) {
+      // console.log("going to faces");
+      // navigate('/change-faces');
+    }
+
+  }, [learnedFaceEvent]);
+  
   return (
     <div
       className="text-logo-container"
@@ -36,6 +49,7 @@ function App() {
     objectDetection: "",
   });
 
+  const [learnedFaceObj, setLearnedFaceObj] = useState();
   const [voiceCommandError, setVoiceCommandError] = useState("");
 
   const onSettingsChange = (page, newSettingsText) => {
@@ -46,27 +60,22 @@ function App() {
   }
 
 
-  // const updateObjectRecognitionSettings = (audioVol, isAudioOn, voiceGender, objsToRecognize, audioPlaybackTime) => {
-  //   const newSettings = {
-  //     audioVolume: audioVol,
-  //     isAudioOn: isAudioOn,
-  //     voiceGender: voiceGender,
-  //     objsToRecognize: objsToRecognize,
-  //     audioPlaybackTime: audioPlaybackTime
-  //   }
-
-
-
-  // }
-
   useEffect(() => {
     socket.on('connect', () => {
-      console.log('Connected to server');
-      socket.emit("react-app");
+      console.log(`Connected to server, socket = ${socket.id}`);
+      socket.emit("react-app-real");
+
     });
 
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
+    });
+
+    socket.on('learn-face', (currentFrame, callback) => {
+      setLearnedFaceObj({
+        faceFrame: currentFrame,
+        callback: callback
+      });
     });
   }, []);
 
@@ -86,11 +95,11 @@ function App() {
 
         <div>
           <Routes>
-            <Route exact path="/" element={<Home />} />
-            <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
-            <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}/>} />
-            <Route exact path="/change-faces" element={<ChangeFaces socket={socket}/>} />
-            <Route exact path="/forget-faces" element={<ForgetFaces socket={socket}/>} />
+            <Route exact path="/" element={<Home learnedFaceEvent={learnedFaceObj}/>} />
+            <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError} learnedFaceEvent={learnedFaceObj}/>} />
+            <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError} learnedFaceEvent={learnedFaceObj}/>} />
+            <Route exact path="/change-faces" element={<ChangeFaces socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
+            <Route exact path="/forget-faces" element={<ForgetFaces socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/viewStream" element={<ViewStream />} />
           </Routes>
         </div>

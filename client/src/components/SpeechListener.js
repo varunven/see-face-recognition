@@ -74,7 +74,7 @@ const SpeechListener = ({
         },
 
         {
-            command: "set minimum distance for :proximity proximity to :newDistance",
+            command: "set max distance for :proximity proximity to :newDistance",
             callback: (proximity, newDistance) => changeProximityThresholds(proximity, newDistance)
         },
 
@@ -101,6 +101,7 @@ const SpeechListener = ({
         }
 
         speechRecog = startListening();
+        changeProximityThresholds("close", 480)
 
     }, []);
 
@@ -175,9 +176,9 @@ const SpeechListener = ({
             textToSpeak = 
             `
                 enable/disable haptic feedback.
-                set minimum distance for close proximity to [value].
-                set minimum distance for medium proximity to [value].
-                set minimum distance for distant proximity to [value].
+                set max distance for close proximity to [value].
+                set max distance for medium proximity to [value].
+                set max distance for distant proximity to [value].
             `
         }
         handleSpeak(textToSpeak);
@@ -287,22 +288,27 @@ const SpeechListener = ({
 
     const changeProximityThresholds = (proximity, newDistance) => {
         let thresh = parseNumberFromText(newDistance);
-        const newState = {
+        let newState = {
 
         };
 
         if (proximity == "close" || proximity == "medium" || proximity == "distant") {
-            handleSpeak(`Setting minimum distance for ${proximity} proximity to ${thresh}`);
-            if (proximity == "close") {
-                newState.nearCutoff = thresh;
-            } else if (proximity == "medium") {
-                newState.midCutoff = thresh;
+            if (thresh >=0 && thresh <= 450){
+              handleSpeak(`Setting minimum distance for ${proximity} proximity to ${thresh}`);
+              if (proximity == "close") {
+                  newState.nearCutoff = thresh;
+              } else if (proximity == "medium") {
+                  newState.midCutoff = thresh;
+              } else {
+                  newState.farCutoff = thresh;
+              }
+              navigate("/object-detection", {
+                  state: newState
+              });
             } else {
-                newState.farCutoff = thresh;
+              handleSpeak("Distances supported are between 0 and 450 cm");
             }
-            navigate("/object-detection", {
-                state: newState
-            });
+
         } else {
             handleSpeak(`Supported proximities are close, medium, and distant.`);
         }

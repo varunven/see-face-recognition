@@ -10,7 +10,7 @@ export const sendSeeRequest = (socket, data) => {
         // }, 5000);
 
         socket.timeout(5000).emit("see-request", data, (err, response_code) => {
-
+            console.log(response_code);
             if (err) {
                 reject("Request timed out");
             }

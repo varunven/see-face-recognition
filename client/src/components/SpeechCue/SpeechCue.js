@@ -19,9 +19,10 @@ const SpeechCue = ({
     }, [speechTag]);
 
     return (
-        <div className={speechTag == 0 ? `cue-container` : `cue-container-${active ? 'active' : `inactive`}`}>
-            <img className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}src={siri}></img>
-        </div>
+        // <div className={speechTag == 0 ? `cue-container` : `cue-container-${active ? 'active' : `inactive`}`}>
+        //     <img className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}src={siri}></img>
+        // </div>
+         null
     )
 
 

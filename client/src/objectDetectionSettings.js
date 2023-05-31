@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
 
 function ObjectDetectionSettings({
     socket, 
     onSettingsChange,
-    onVoiceCommandError
+    onVoiceCommandError,
+    learnedFaceEvent
 }) {
 
     const newVoiceSettings = useLocation().state;
+    const navigate = useNavigate();
 
     const [settings, setSettings] = useState({
         isHapticOn: localStorage.getItem('isHapticOn') ? JSON.parse(localStorage.getItem('isHapticOn')) : true,
@@ -16,6 +18,12 @@ function ObjectDetectionSettings({
         midCutoff: localStorage.getItem('midCutoff') ? parseInt(localStorage.getItem('midCutoff')) : 200,
         farCutoff: localStorage.getItem('farCutoff') ? parseInt(localStorage.getItem('farCutoff')) : 450
       });
+
+      useEffect(() => {
+        if (learnedFaceEvent) {
+          navigate('/change-faces');
+        }
+      }, [learnedFaceEvent]);
 
 
     useEffect(() => {
@@ -36,7 +44,41 @@ function ObjectDetectionSettings({
           console.log(newVoiceSettings);
           onVoiceCommandError("");
           console.log("Sending settings to pi");
-          const {nearCutoff = null, midCutoff = null, farCutoff = null, isHapticOn = null} = newVoiceSettings ?? {};
+          let {nearCutoff = null, midCutoff = null, farCutoff = null, isHapticOn = null} = newVoiceSettings ?? {};
+          console.log(nearCutoff);
+          console.log(midCutoff);
+          console.log(farCutoff);
+
+          if (nearCutoff) {
+
+            if (nearCutoff > 448) {
+              nearCutoff = 448;
+            }
+
+            if (nearCutoff >= settings.midCutoff) {
+              console.log("in");
+              midCutoff = Math.ceil((nearCutoff + settings.farCutoff + 1) / 2);
+              if (midCutoff == 450) {
+                midCutoff--;
+              }
+              farCutoff = nearCutoff >= settings.farCutoff ? Math.ceil((midCutoff + 1 + 450) / 2) : settings.farCutoff;
+              if (midCutoff == 449) {
+                farCutoff = 450;
+              }
+            }
+          } else if (midCutoff) {
+            if (midCutoff >= settings.farCutoff) {
+              farCutoff = midCutoff >= settings.farCutoff ? Math.ceil((settings.midCutoff + 1 + 450) / 2) : settings.farCutoff;
+            } else if (midCutoff <= settings.nearCutoff) {
+              onVoiceCommandError("Could not set max distance for medium proximity: distance less than threshold of close proximity");
+              return;
+            }
+          } else if (farCutoff) {
+            if (farCutoff <= settings.midCutoff) {
+              onVoiceCommandError("Could not set max distance for medium proximity: distance less than threshold of close proximity");
+              return;
+            }
+          }
     
           const newSettings = {
             isHapticOn: isHapticOn != null ? isHapticOn : settings.isHapticOn,
@@ -58,7 +100,6 @@ function ObjectDetectionSettings({
               }
             )
             .catch((err) => {
-              console.log("WHYY");
               onVoiceCommandError("Could not update object detection settings. Please try again")});
         }
     
@@ -75,31 +116,52 @@ function ObjectDetectionSettings({
     
 
     const handleObjDistanceNearChange = (event) => {
-        const newNearValue = parseInt(event.target.value);
+        let newNearValue = parseInt(event.target.value);
+        if (newNearValue > 448) {
+          newNearValue = 448;
+        }
+        let newMidValue = newNearValue >= settings.midCutoff ? Math.ceil((settings.midCutoff + settings.farCutoff + 1) / 2) : settings.midCutoff;
+        if (newMidValue == 450) {
+          newMidValue--;
+        }
+        let newFarValue = newNearValue >= settings.farCutoff ? Math.ceil((newMidValue + 1 + 450) / 2) : settings.farCutoff;
+        if (newMidValue == 449) {
+          newFarValue = 450;
+        }
 
         setSettings(prevSettings => ({
             ...prevSettings,
             nearCutoff: newNearValue,
+            midCutoff: newMidValue,
+            farCutoff: newFarValue
         }));
         // Store the value in local storage when it changes
-        localStorage.setItem('nearCutoff', newNearValue);
     };
 
     const handleObjDistanceMidChange = (event) => {
-        const newMidValue = parseInt(event.target.value);
+        let newMidValue = parseInt(event.target.value);
+        if (newMidValue <= settings.nearCutoff) {
+          newMidValue = settings.nearCutoff + 1;
+        } else if (newMidValue == 450) {
+          newMidValue = 449;
+        }
+        const newFarValue = newMidValue >= settings.farCutoff ? Math.ceil((settings.midCutoff + 1 + 450) / 2) : settings.farCutoff;
 
         setSettings(prevSettings => ({
             ...prevSettings,
             midCutoff: newMidValue,
+            farCutoff: newFarValue
         }));
         // Store the value in local storage when it changes
         localStorage.setItem('midCutOff', newMidValue);
+        localStorage.setItem('farCutoff', newFarValue);
     };
 
     const handleObjDistanceFarChange = (event) => {
-        const newFarValue = parseInt(event.target.value);
-        // const newNearValue = value < settings.nearCutoff ? value - 1 : settings.midCutoff;
-        // const newFarValue = value > settings.newMidValue ? value + 1 : settings.farCutoff;
+        let newFarValue = parseInt(event.target.value);
+        if (newFarValue <= settings.midCutoff) {
+          newFarValue = settings.midCutoff + 1;
+        }
         setSettings(prevSettings => ({
             ...prevSettings,
             farCutoff: newFarValue
@@ -125,16 +187,6 @@ function ObjectDetectionSettings({
     
     const handleSubmit = async(newSettings) => {
         console.log("Submitted object detection settings")
-        // if (objDetectionDistanceNear > objDetectionDistanceMid) {
-        //     objDetectionDistanceMid = objDetectionDistanceNear + 1
-        //     objDetectionDistanceMid = Math.min(objDetectionDistanceMid, 400)
-        //     setObjDetectionDistanceMid(objDetectionDistanceMid);
-        // }
-        // if (objDetectionDistanceMid > objDetectionDistanceFar) {
-        //     objDetectionDistanceFar = objDetectionDistanceMid + 1
-        //     objDetectionDistanceFar = Math.min(objDetectionDistanceFar, 400)
-        //     setObjDetectionDistanceFar(objDetectionDistanceFar);
-        // }
         return await submitSettingsUpdateRequest(newSettings);
     };
 
@@ -147,36 +199,36 @@ function ObjectDetectionSettings({
     return (
         <div>
         <div>
-            <label htmlFor="objDetectionDistanceNear">Minimum Distance for Object Detection (Near)</label>
+            <label htmlFor="objDetectionDistanceNear">Maximum Distance for Object Detection (Near)</label>
             <input
                 type="range"
                 id="objDetectionDistanceNear"
                 min={0}
-                max={400}
+                max={450}
                 value={settings.nearCutoff}
                 onChange={handleObjDistanceNearChange}
             />
             <span>{settings.nearCutoff}</span>
         </div>
         <div>
-            <label htmlFor="objDetectionDistanceMid">Minimum Distance for Object Detection (Middle)</label>
+            <label htmlFor="objDetectionDistanceMid">Maximum Distance for Object Detection (Middle)</label>
             <input
                 type="range"
                 id="objDetectionDistanceMid"
                 min={0}
-                max={400}
+                max={450}
                 value={settings.midCutoff}
                 onChange={handleObjDistanceMidChange}
             />
             <span>{settings.midCutoff}</span>
         </div>
         <div>
-            <label htmlFor="objDetectionDistanceFar">Minimum Distance for Object Detection (Far)</label>
+            <label htmlFor="objDetectionDistanceFar">Maximum Distance for Object Detection (Far)</label>
             <input
                 type="range"
                 id="objDetectionDistanceFar"
                 min={0}
-                max={400}
+                max={450}
                 value={settings.farCutoff}
                 onChange={handleObjDistanceFarChange}
             />
@@ -194,8 +246,11 @@ function ObjectDetectionSettings({
         </div>
         <button onClick={async() => {
             await handleSubmit(settings)
-                .then(res => console.log("sucessfully submited and updated settings"))
-                .catch(err => console.log("Could not submit and update settings"));
+                .then(res => {
+                  console.log("sucessfully submited and updated settings");
+                  setAllLocalStorageSettings(settings);
+              })
+                .catch(err => {console.log("Could not submit and update settings")});
             }}>Submit</button>
         </div>
     );

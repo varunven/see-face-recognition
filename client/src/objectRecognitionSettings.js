@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
 import { recognizableObjects } from './constants/recognizableObjects';
 
 function ObjectRecognitionSettings({
   socket,
   onSettingsChange,
-  onVoiceCommandError
+  onVoiceCommandError,
+  learnedFaceEvent
 }) {
 
   const newVoiceSettings = useLocation().state;
+  const navigate = useNavigate();
 
 
   const [settings, setSettings] = useState({
@@ -20,6 +22,12 @@ function ObjectRecognitionSettings({
     voiceGender: localStorage.getItem('voiceGender') ? localStorage.getItem('voiceGender') : "male",
     audioPlaybackTime: localStorage.getItem('audioPlaybackTime') ? parseInt(localStorage.getItem('audioPlaybackTime')) : 5
   });
+
+  useEffect(() => {
+    if (learnedFaceEvent) {
+      navigate('/change-faces');
+    }
+  }, [learnedFaceEvent]);
 
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -63,17 +71,13 @@ function ObjectRecognitionSettings({
       console.log(`new setings`);
       console.log(newSettings);
       // submit request to rasp pi first, and only update u.i on successfully changing settings
-      await sendSeeRequest(socket, {
-        service_name: "object-recognition-settings",
-        newSettings: newSettings
-      }).then(res => {
+      await submitSettingsUpdateRequest(newSettings).then(res => {
           console.log("received response");
           setSettings(newSettings);
           setAllLocalStorageSettings(newSettings);
           }
         )
         .catch((err) => {
-          console.log("WHYY");
           onVoiceCommandError("Could not update object recognition settings. Please try again")});
     }
 
@@ -161,9 +165,19 @@ function ObjectRecognitionSettings({
 
 
   const submitSettingsUpdateRequest = async(newSettings) => {
+    let settingsCopy = {...newSettings};
+    let objectsPrioMap = {};
+    for (let i = 0; i < newSettings.objsPriority.length; i++) {
+      objectsPrioMap[recognizableObjects[i]] = newSettings.objsPriority[i];
+    }
+
+    settingsCopy.objsPriority = objectsPrioMap;
+
+    console.log(objectsPrioMap);
+
     return await sendSeeRequest(socket, {
       service_name: "object-recognition-settings",
-      newSettings: newSettings
+      newSettings: settingsCopy
     });
   }
 
@@ -256,10 +270,16 @@ function ObjectRecognitionSettings({
     <div>
         <label>
           How often should the audio playback for objects recognized be relayed?
-          <input type="text" value={settings.audioPlaybackTime} onChange={handleAudioPlayBack} />
+          <input type="number" value={settings.audioPlaybackTime} onChange={handleAudioPlayBack} />
         </label>
       </div>
-      <button onClick={() => submitSettingsUpdateRequest(settings)}>Submit</button>
+      <button onClick={async() => {
+        await submitSettingsUpdateRequest(settings)
+          .then(res => {setAllLocalStorageSettings(settings)})
+          .catch(err => console.log(err));
+
+
+        }}>Submit</button>
     </div>
   );
 }
