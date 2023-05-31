@@ -89,6 +89,7 @@ const SpeechListener = ({
     const {
         transcript,
         listening,
+        isMicrophoneAvailable,
         resetTranscript,
         browserSupportsSpeechRecognition
       } = useSpeechRecognition({ commands });
@@ -96,11 +97,18 @@ const SpeechListener = ({
     
     useEffect(() => {
         let speechRecog;
+        console.log(isMicrophoneAvailable);
         const startListening = async() => {
-            return await SpeechRecognition.startListening({ continuous: true });
+            const x = await SpeechRecognition.startListening({ continuous: true });
+            console.log(x);
         }
 
+        console.log(listening);
         speechRecog = startListening();
+
+        // return () => {
+        //     SpeechRecognition.abortListening();
+        // }
 
     }, []);
 

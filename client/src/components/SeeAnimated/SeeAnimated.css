@@ -1,0 +1,17 @@
+.animation-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.outer-gray {
+    position: absolute;
+    max-width: 100%;
+}
+
+.inner-black {
+    position: absolute;
+    top: 25%;
+    left: 75%;
+    max-width: 50%;
+}
