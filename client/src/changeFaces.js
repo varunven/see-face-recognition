@@ -55,27 +55,26 @@ const ChangeFaces = ({socket}) => {
   }, [currentIndex])
 
   //TODO on raspi:
-  // Send array of image data through socket
-  // for image_path in file_folder:
-    // with open(image_path, 'rb') as file:
-    //     image_data = file.read()
-  //      arr.append((faceId, firstName, lastName, image_data))
-  // socket.emit('add-face', arr)
+  // Send face id through socket to server
+  // socket.emit('add-face', faceid) when learn face is pressed
 
   //TODO on server:
   // io.on('connection', (socket) => {
-  //   socket.on('add-face', (fileaudio, faceId, imageData) => {    
-  //   io.emit('image-data', { fileaudio, faceId, imageData});
+  //   socket.on('add-face', ( imageurl) => { (to web client)   
+  //   io.emit('add-face', { firstname, lastname }); (back to pi)
+    //  save the img with face id at the time as firstname_lastname_faceid.png
   //   });
   // });
 
-  //TODO on client side:
-  // socket.on('add-face', (data) => {
-  //   const { fileaudio, faceId, imageUrl } = data;
-  //   display arr imagedata and if pressed, then play fileaudio
+  //TODO on web client side:
+  // socket.on('add-face', (imageurl) => {
+  //   get a pop up of image, say this is face id --> what should their name be?
+  //  send back faceid, firstname, lastname
   // });
 
   //TODO on server: do the inbetween
+  
+  // have get all images to show all learned faces with their names
   return (
     <div className="gallery">
       <div className="image-container">

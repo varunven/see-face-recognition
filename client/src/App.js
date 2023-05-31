@@ -66,7 +66,7 @@ function App() {
           <Link to="/" className="MenuItem">Home</Link>
           <Link to="/object-recognition" className="MenuItem">Object Recognition Settings</Link>
           <Link to="/object-detection" className="MenuItem">Object Detection Settings</Link>
-          <Link to="/change-faces" className="MenuItem">Change Faces</Link>
+          <Link to="/change-faces" className="MenuItem">Learned Faces</Link>
           <Link to="/forget-faces" className="MenuItem">Forget Faces</Link>
         </div>
 
