@@ -61,6 +61,7 @@ const ChangeFaces = ({
 
   useEffect(() => {
     if (learnedFaceEvent) {
+      onVoiceCommandError("New face detected. Say save face as, followed by a name");
       const {faceFrame, callback} = learnedFaceEvent;
       console.log("new face incoming")
       setLearnedFaceObj(learnedFaceEvent);
@@ -90,14 +91,17 @@ const ChangeFaces = ({
 
   useEffect(() => {
 
+
     const saveNameOfFace = () => {
-      window.history.replaceState({}, document.title)
-      console.log("saving face via auidio");
-      onVoiceCommandError("New face detected. Say save face as, followed by a name");
-      setLearnedFaceName(newFaceName);
-      learnedFaceObj.callback(newFaceName, 200);
-      setLearnFaceView(false);
-      navigate('/');
+      if (newFaceName) {
+        window.history.replaceState({}, document.title)
+        console.log("saving face via auidio");
+        setLearnedFaceName(newFaceName.name);
+        learnedFaceObj.callback(newFaceName.name, 200);
+        setLearnFaceView(false);
+        navigate('/');
+      }
+
     }
 
     saveNameOfFace()
