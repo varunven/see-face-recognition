@@ -11,10 +11,12 @@ import ReactLoading from 'react-loading';
 const ChangeFaces = ({
   socket,
   learnedFaceEvent,
-  clearFaceEvent
+  clearFaceEvent,
+  onVoiceCommandError
 }) => {
 
   const navigate = useNavigate(); 
+  const newFaceName = useLocation().state;
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showOverlay, setShowOverlay] = useState(false)
@@ -63,8 +65,6 @@ const ChangeFaces = ({
       console.log("new face incoming")
       setLearnedFaceObj(learnedFaceEvent);
       setLearnFaceView(true);
-      clearFaceEvent();
-
       // const canvas = canvasRef.current;
       // const context = canvas.getContext('2d');
 
@@ -74,6 +74,7 @@ const ChangeFaces = ({
       const imageData = i420ToCanvas(new Uint8Array(i420Data), width, height);
       console.log("setting new imagedata");
       setLearnedFaceImageData(imageData);
+      clearFaceEvent();
 
     }
   }, [learnedFaceEvent])
@@ -86,6 +87,21 @@ const ChangeFaces = ({
       context.putImageData(learnedFaceImageData, 0, 0);
     }
   }, [learnFaceView, learnedFaceImageData])
+
+  useEffect(() => {
+
+    const saveNameOfFace = () => {
+      window.history.replaceState({}, document.title)
+      console.log("saving face via auidio");
+      onVoiceCommandError("New face detected. Say save face as, followed by a name");
+      setLearnedFaceName(newFaceName);
+      learnedFaceObj.callback(newFaceName, 200);
+      setLearnFaceView(false);
+      navigate('/');
+    }
+
+    saveNameOfFace()
+  }, [newFaceName])
 
 
   const getCarouselItems = () => {
