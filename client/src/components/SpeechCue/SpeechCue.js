@@ -1,8 +1,8 @@
 import "./SpeechCue.css";
-import siri from "../../assets/see-anim.gif";
 import { useState, useEffect, useRef } from "react";
 import SeeAnimated from "../SeeAnimated/SeeAnimated";
 
+// controls rendering SeeAnimated and resizing it to make speech recognition more interactive
 const SpeechCue = ({
     active,
     speechTag
@@ -21,17 +21,12 @@ const SpeechCue = ({
 
     return (
         <div className={speechTag == 0 ? `cue-container` : `cue-container-${active ? 'active' : `inactive`}`}>
-            {/* <img className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}src={siri}></img> */}
             <div className={`anim-sphere-${sphereActive ? 'active' : 'inactive'}`}>
                 <SeeAnimated></SeeAnimated>
             </div>
 
         </div>
     )
-
-
-    return null;
-
 }
 
 export default SpeechCue;

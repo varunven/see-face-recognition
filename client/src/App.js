@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { io } from "socket.io-client";
-
-import ForgetFaces from "./forgetFaces"
-import ChangeFaces from './changeFaces';
-import ObjectDetectionSettings from './objectDetectionSettings';
-import ObjectRecognitionSettings from './objectRecognitionSettings';
+import LearnedFaces from './pages/LearnedFaces';
+import ObjectDetectionSettings from './pages/ObjectDetectionSettings';
+import ObjectRecognitionSettings from './pages/ObjectRecognitionSettings';
 import ViewStream from './pages/ViewStream';
-import SpeechSynthesis from './components/SpeechSynthesis';
-import SpeechListener from './components/SpeechListener';
 import SpeechAssistant from './components/SpeechAssistant';
 import Navbar from './components/Navbar/Navbar';
 import logo from "./assets/logo.png";
 
-const server_url = 'https://7f46-2601-602-867f-c8d0-a8b4-eee3-ec61-e127.ngrok-free.app'
-// const server_url = 'http://localhost:3001'
+const server_url = process.env.REACT_APP_SERVER_URL;
 const socket = io(server_url, { transports: ['websocket', 'polling', 'flashsocket'] });
 
+// renders the home screen
 function Home({
   learnedFaceEvent
 }) {
@@ -26,8 +22,7 @@ function Home({
 
   useEffect(() => {
     if (learnedFaceEvent) {
-      console.log("going to faces");
-      navigate('/change-faces');
+      navigate('/learned-faces');
     }
 
   }, [learnedFaceEvent]);
@@ -40,13 +35,11 @@ function Home({
         <img className='main-logo' src={logo}></img>
         <p className='main-sub'>Welcome to SEE. Configure you device settings here. For more help, say help.</p>
       </div>
-
-      {/* <SpeechListener></SpeechListener>
-      <SpeechSynthesis text={"  Welcome to SEE. To list a page's components, say: read page. For more help, say: help"}></SpeechSynthesis> */}
     </div>
   );
 }
 
+// top-level component. Renders all components in the web app
 function App() {
 
   const [allPagesText, setAllPagesText] = useState({
@@ -68,7 +61,6 @@ function App() {
     setLearnedFaceObj(null);
   }
 
-
   useEffect(() => {
     socket.on('connect', () => {
       console.log(`Connected to server, socket = ${socket.id}`);
@@ -88,28 +80,17 @@ function App() {
     });
   }, []);
 
-  
-
   return (
     <Router>
-              <Navbar/>
+      <Navbar/>
       <div className="App">
-        {/* <div className="Menu">
-          <Link to="/" className="MenuItem">Home</Link>
-          <Link to="/object-recognition" className="MenuItem">Object Recognition Settings</Link>
-          <Link to="/object-detection" className="MenuItem">Object Detection Settings</Link>
-          <Link to="/change-faces" className="MenuItem">Learned Faces</Link>
-          <Link to="/forget-faces" className="MenuItem">Forget Faces</Link>
-        </div> */}
-
         <div className='all'>
           <Routes>
             <Route exact path="/" element={<Home  learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/object-recognition" element={<ObjectRecognitionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}  learnedFaceEvent={learnedFaceObj}/>} />
             <Route exact path="/object-detection" element={<ObjectDetectionSettings socket={socket} onSettingsChange={onSettingsChange} onVoiceCommandError={setVoiceCommandError}  learnedFaceEvent={learnedFaceObj}/>} />
-            <Route exact path="/change-faces" element={<ChangeFaces socket={socket} learnedFaceEvent={learnedFaceObj} clearFaceEvent={handleClearEvent} onVoiceCommandError={setVoiceCommandError}/>} />
-            <Route exact path="/view-stream" element={<ForgetFaces socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
-            <Route exact path="/viewStream" element={<ViewStream />} />
+            <Route exact path="/learned-faces" element={<LearnedFaces socket={socket} learnedFaceEvent={learnedFaceObj} clearFaceEvent={handleClearEvent} onVoiceCommandError={setVoiceCommandError}/>} />
+            <Route exact path="/view-stream" element={<ViewStream socket={socket} learnedFaceEvent={learnedFaceObj}/>} />
           </Routes>
         </div>
         <SpeechAssistant socket={socket} allPagesText={allPagesText} voiceError={voiceCommandError}></SpeechAssistant>

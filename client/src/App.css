@@ -48,6 +48,18 @@
   margin-bottom: 20px;
 }
 
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+input {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 3%;
+}
+
 .MenuItem {
   padding: 10px 20px;
   background-color: #f2f2f2;
@@ -278,7 +290,6 @@ input:checked + .slider:before {
   justify-content: center;
   align-items: center;
 }
-
 
 .option.active {
   background-color: #2196f3;

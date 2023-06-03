@@ -1,29 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
-import { useLocation, useNavigate, useRoutes } from "react-router-dom";
-import { SeeRequest, sendSeeRequest } from "../utils/seeRequest";
+import { useLocation, useNavigate } from "react-router-dom";
 import { wordToNum, recognizableObjects } from "../constants/recognizableObjects";
 
+// configures speech recogntion. Starts speech recognition on component mount
+// configures the supported voice commands.
 const SpeechListener = ({
-    socket,
     handleSpeak,
     handleOnSpeech,
     allPagesText
 }) => {
 
-    const [isListening, setIsListening] = useState(false);
     const location = useLocation().pathname;
     const navigate = useNavigate();
-    const routes = ['/', '/objectRecognition', '/objectDetection', '/changeFaces', '/forgetFaces', '/viewStream'];
 
     const commands = [
-
-        {
-            command: ["hey see", "hey C", "hey c", "ac", "Casey"],
-            matchInterim: true,
-            isFuzzyMatch: true,
-            callback: () => activateListener()
-        },
 
         {
             command: "read page",
@@ -87,28 +78,20 @@ const SpeechListener = ({
           command: "save face as :name",
           callback: (name) => handleNameForFace(name)
         }
-
-
     ]
 
     const {
         transcript,
-        listening,
-        isMicrophoneAvailable,
-        resetTranscript,
         browserSupportsSpeechRecognition
       } = useSpeechRecognition({ commands });
 
     
     useEffect(() => {
-        let speechRecog;
-        console.log(isMicrophoneAvailable);
         const startListening = async() => {
-            const x = await SpeechRecognition.startListening({ continuous: true });
-            console.log(x);
+            await SpeechRecognition.startListening({ continuous: true });
         }
 
-        const x = startListening();
+        startListening();
 
     }, []);
 
@@ -120,11 +103,6 @@ const SpeechListener = ({
 
     }, [transcript]);
 
-
-    const activateListener = () => {
-        setIsListening(true);
-    }
-
     // reads out contents of a page
     const handleReadPage = () => {
         let readText = "";
@@ -135,8 +113,8 @@ const SpeechListener = ({
                     Home
                     Object Recognition Settings. 
                     Object Detection Settings. 
-                    Change Faces. 
-                    Forget Faces.
+                    Learned Faces. 
+                    View Stream.
             `
         }
         else if (location == "/object-recognition") {
@@ -154,8 +132,8 @@ const SpeechListener = ({
         General
         Object Recognition
         Object Detection
-        Change Faces
-        Forget Faces
+        Learned Faces
+        View Stream
         
         To learn a command group, say learn followed by the command group name`;
         handleSpeak(textToSpeak);
@@ -202,12 +180,12 @@ const SpeechListener = ({
         } else if (page.includes('detection')) {
             handleSpeak('Going to Object Detection Settings.');
             navigate('/object-detection');
-        } else if (page == 'change faces') {
-            handleSpeak('Going to Change Faces');
-            navigate('/change-faces');
-        } else if (page == 'forget faces') {
-            handleSpeak('Going to Forget Faces');
-            navigate('/forget-faces');
+        } else if (page == 'learned faces') {
+            handleSpeak('Going to Learned Faces');
+            navigate('/learned-faces');
+        } else if (page == 'view stream') {
+            handleSpeak('Going to View Stream');
+            navigate('/view-stream');
         } else {
             handleSpeak('Page not found');
         }
@@ -251,10 +229,6 @@ const SpeechListener = ({
         } else {
             handleSpeak("Supported text to speech voices are male and female")
         }
-    }
-
-    const changeObjRecogMinDist = () => {
-        console.log("changing obj recog min distance");
     }
 
     const changeObjectPriority = (object, newPriority) => {
@@ -335,18 +309,12 @@ const SpeechListener = ({
      }
 
      const handleNameForFace = (name) => {
-      navigate("/change-faces", {
+      navigate("/learned-faces", {
         state: {
             name: name
         }
     });
      }
-
-
-
-
-
-
 
     // attempts to parse a string to a number
     const parseNumberFromText = (number) => {
@@ -357,16 +325,11 @@ const SpeechListener = ({
         return num;
     }
 
-
-
     if (!browserSupportsSpeechRecognition) {
         return <p className="error-msg">Browser doesn't support speech recognition</p>
     } else {
         return null;
     }
-
-
-
 }
 
 export default SpeechListener;

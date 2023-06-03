@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
+// Configures the app's text to speech. Is called on-command by the 
+// speech listener to relay text via audio
 const SpeechSynthesis = ({
     active,
     textToSpeak,
@@ -7,8 +9,6 @@ const SpeechSynthesis = ({
     setActive
 }) => {
 
-    const [isPaused, setIsPaused] = useState(false);
-    const [utterance, setUtterance] = useState(null);
     const timeoutRef = useRef();
   
     useEffect(() => {
@@ -30,7 +30,6 @@ const SpeechSynthesis = ({
         synth.speak(u);
       }
 
-  
       return () => {
         synth.cancel();
       };
@@ -44,15 +43,7 @@ const SpeechSynthesis = ({
         }, 3000);
       }
 
-    }, [speechTag])
-  
-    const handleStop = () => {
-      const synth = window.speechSynthesis;
-  
-      synth.cancel();
-  
-      setIsPaused(false);
-    };
+    }, [speechTag]);
   
     return (
       null
