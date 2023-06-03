@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-
 import "./Navbar.css";
 import logo from "../../assets/nav-bar-logo.png"
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faX } from "@fortawesome/free-solid-svg-icons";
 
-const Navbar = (props) => {
+// Renders a horizontal navigation bar for the different pages on web and mobile
+const Navbar = () => {
 
     const [toggle, isToggled] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
@@ -18,6 +18,7 @@ const Navbar = (props) => {
       window.addEventListener('resize', reactToWindowResize);
     });
 
+    // set up navigation pages
     const renderNavItems = () => {
       if (isMobile) {
         return (
@@ -34,7 +35,7 @@ const Navbar = (props) => {
             <li className={"item " + (toggle ? "active" : "")}><a>Object Detection Settings</a></li>
           </Link>
 
-          <Link to={'/change-faces'}>
+          <Link to={'/learned-faces'}>
             <li className={"item " + (toggle ? "active" : "")}><a>Learned Faces</a></li>
           </Link>
 
@@ -59,7 +60,7 @@ const Navbar = (props) => {
               <li className={"item " + (toggle ? "active" : "")}><a>Object Detection Settings</a></li>
             </Link>
 
-            <Link to={'/change-faces'}>
+            <Link to={'/learned-faces'}>
               <li className={"item " + (toggle ? "active" : "")}><a>Learned Faces</a></li>
             </Link>
 
@@ -87,7 +88,6 @@ const Navbar = (props) => {
         </ul>
     </nav>
     )
-
 }
 
 export default Navbar

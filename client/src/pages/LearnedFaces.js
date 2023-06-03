@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { images, audio_files } from './face_files'
 import { useLocation, useNavigate } from "react-router-dom";
-import { Carousel } from "react-responsive-carousel";
-import { sendYoloRequest } from './utils/seeRequest';
+import { sendYoloRequest } from '../utils/seeRequest';
 import './changeFaces.css';
-import { delay } from './utils/delay';
-import { all } from 'axios';
+import { delay } from '../utils/delay';
 import ReactLoading from 'react-loading';
 
-const ChangeFaces = ({
+// Renders the Learned Faces page
+const LearnedFaces = ({
   socket,
   learnedFaceEvent,
   clearFaceEvent,
@@ -19,21 +17,11 @@ const ChangeFaces = ({
   const newFaceName = useLocation().state;
 
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [showOverlay, setShowOverlay] = useState(false)
-  const [newFirstName, setFirstName] = useState("")
-  const [newLastName, setLastName] = useState("")
-
-
   const [learnFaceView, setLearnFaceView] = useState();
   const [learnedFaceName, setLearnedFaceName] = useState("");
   const [learnedFaceImageData, setLearnedFaceImageData] = useState();
-
   const [allFaces, setAllFaces] = useState([]);
-
   const canvasRef = useRef();
-  // const { images, audio_files} = { images, audio_files} // normally would use api to get images
-
-  // person name is name of file separated by _ --> "jason_statham" --> Jason Stathamf
   const [learnedFaceObj, setLearnedFaceObj] = useState();
   const [isLoadingImages, setIsLoadingImages] = useState(true);
 
@@ -41,7 +29,6 @@ const ChangeFaces = ({
     
     const getImages = async() => {
       await delay(1000);
-      console.log("getting images");
       sendYoloRequest(socket)
       .then(res => {
         setIsLoadingImages(false);
@@ -55,25 +42,18 @@ const ChangeFaces = ({
 
     getImages();
 
-
-
   }, [socket])
 
   useEffect(() => {
     if (learnedFaceEvent) {
       onVoiceCommandError("New face detected. Say save face as, followed by a name");
       const {faceFrame, callback} = learnedFaceEvent;
-      console.log("new face incoming")
       setLearnedFaceObj(learnedFaceEvent);
       setLearnFaceView(true);
-      // const canvas = canvasRef.current;
-      // const context = canvas.getContext('2d');
-
       const i420Data = faceFrame.data;
       const width = faceFrame.width;
       const height = faceFrame.height;
       const imageData = i420ToCanvas(new Uint8Array(i420Data), width, height);
-      console.log("setting new imagedata");
       setLearnedFaceImageData(imageData);
       clearFaceEvent();
 
@@ -82,7 +62,6 @@ const ChangeFaces = ({
 
   useEffect(() => {
     if (learnFaceView) {
-      console.log("putting into image");
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       context.putImageData(learnedFaceImageData, 0, 0);
@@ -91,35 +70,18 @@ const ChangeFaces = ({
 
   useEffect(() => {
 
-
     const saveNameOfFace = () => {
       if (newFaceName) {
         window.history.replaceState({}, document.title)
-        console.log("saving face via auidio");
         setLearnedFaceName(newFaceName.name);
         learnedFaceObj.callback(newFaceName.name, 200);
         setLearnFaceView(false);
         navigate('/');
       }
-
     }
 
     saveNameOfFace()
   }, [newFaceName])
-
-
-  const getCarouselItems = () => {
-    if (allFaces.length > 0) {
-      return allFaces.map(face => (
-        <div className="carousel-face-container">
-          <img className="carousel-face-img" src={`${process.env.REACT_APP_SERVER_URL}/faces/${face}`}></img>
-          <p className='carousel-face-name'>{face.substring(face.indexOf("_"), face.indexOf("."))}</p>
-        </div>
-      ));
-    }
-
-  }
-
 
   function i420ToCanvas(data, width, height) {
     // Convert I420 (YUV420p) to RGB
@@ -168,9 +130,7 @@ const ChangeFaces = ({
 
 
   const renderCarousel = () => {
-
     if (allFaces.length > 0) {
-
       return (
         <>
           <button className="left-gallery-button" onClick={handlePrev}>
@@ -200,27 +160,6 @@ const ChangeFaces = ({
     setCurrentIndex((prevIndex) => (prevIndex === allFaces.length - 1 ? 0 : prevIndex + 1))
   }
 
-  // When button is pressed do action
-  // const handleFaceClick = () => {
-  //   const audioElement = document.getElementById(newNameWithoutExtension);
-  //   if (audioElement) {
-  //     audioElement.play();
-  //   }
-  //   setShowOverlay(true)
-  // }
-
-  const handleSubmit = (faceId, newFirstName, newLastName) => {
-    console.log("Sent submission change request")
-
-    socket.emit('see-request', {
-      service_name: "change-faces",
-      faceId: faceId,
-      newFirstName: newFirstName,
-      newLastName: newLastName
-     })
-    setShowOverlay(false)
-  }
-
   const handleLearnedFaceNameChange = (e) => {
     setLearnedFaceName(e.target.value);
   }
@@ -230,15 +169,6 @@ const ChangeFaces = ({
     setLearnFaceView(false);
     navigate('/');
   }
-
-  useEffect(() => {
-    // Retrieve the stored value from local storage on component mount
-    const name = localStorage.getItem(currentIndex)
-    if (name) {
-      setFirstName(parseInt(name.split(" ")[0]))
-      setLastName(parseInt(name.split(" ")[1]))
-    }
-  }, [currentIndex])
 
   if (learnFaceView) {
     return(
@@ -276,7 +206,6 @@ const ChangeFaces = ({
     </div>
     
   )}
-
 }
 
-export default ChangeFaces
+export default LearnedFaces

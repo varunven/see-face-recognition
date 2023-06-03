@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import SpeechListener from "./SpeechListener";
 import SpeechSynthesis from "./SpeechSynthesis";
 import SpeechCue from "./SpeechCue/SpeechCue";
 import AudioPlayer from "./AudioPlayer";
 
+// Spawns a speech listener and speech synthesizer for speech recognition and relays events between them.
 const SpeechAssistant = ({
     socket,
     allPagesText,
@@ -13,7 +14,6 @@ const SpeechAssistant = ({
     const [active, setActive] = useState(false);
     const [speechTag, setSpeechTag] = useState(0);
     const [textToSpeak, setTextToSpeak] = useState("");
-
 
     const handleOnSpeech = () => {
         setActive(true);
@@ -25,8 +25,6 @@ const SpeechAssistant = ({
             setTextToSpeak(voiceError);
         }
     }, [voiceError])
-
-
 
     return (
         <>
