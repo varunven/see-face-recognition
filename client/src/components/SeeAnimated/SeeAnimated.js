@@ -2,7 +2,8 @@ import './SeeAnimated.css';
 import outerGray from '../../assets/gray-nbg.gif';
 import innerBlack from '../../assets/black-nbg.gif';
 
-const SeeAnimated = ({ gif1, gif2 }) => {
+// renders the animated see logo indicator for speech recognition
+const SeeAnimated = () => {
   return (
     <div className='animation-container'>
       <img

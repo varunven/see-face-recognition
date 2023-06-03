@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
+import { sendSeeRequest } from '../utils/seeRequest';
 
+// Renders the Objection Detection Settings page
 function ObjectDetectionSettings({
     socket, 
     onSettingsChange,
@@ -21,7 +22,7 @@ function ObjectDetectionSettings({
 
       useEffect(() => {
         if (learnedFaceEvent) {
-          navigate('/change-faces');
+          navigate('/learned-faces');
         }
       }, [learnedFaceEvent]);
 
@@ -40,14 +41,8 @@ function ObjectDetectionSettings({
 
         const updateSettings = async() => {
           window.history.replaceState({}, document.title)
-          console.log("receiving new settings via voice commands");
-          console.log(newVoiceSettings);
           onVoiceCommandError("");
-          console.log("Sending settings to pi");
           let {nearCutoff = null, midCutoff = null, farCutoff = null, isHapticOn = null} = newVoiceSettings ?? {};
-          console.log(nearCutoff);
-          console.log(midCutoff);
-          console.log(farCutoff);
 
           if (nearCutoff) {
 
@@ -56,7 +51,6 @@ function ObjectDetectionSettings({
             }
 
             if (nearCutoff >= settings.midCutoff) {
-              console.log("in");
               midCutoff = Math.ceil((nearCutoff + settings.farCutoff + 1) / 2);
               if (midCutoff == 450) {
                 midCutoff--;
@@ -87,8 +81,6 @@ function ObjectDetectionSettings({
             farCutoff: farCutoff ? farCutoff : settings.farCutoff
           }
         
-          console.log(`new setings`);
-          console.log(newSettings);
           // submit request to rasp pi first, and only update u.i on successfully changing settings
           await sendSeeRequest(socket, {
             service_name: "object-detection-settings",
@@ -108,7 +100,6 @@ function ObjectDetectionSettings({
           updateSettings();
         } else {
           setTimeout(() => {
-            console.log("retrying");
             updateSettings();
           }, 1000);
         }
@@ -180,7 +171,6 @@ function ObjectDetectionSettings({
     };
 
     const submitSettingsUpdateRequest = async (newSettings) => {
-        console.log("Submitted object detection settings")
         return await sendSeeRequest(socket, {
           service_name: "object-detection-settings",
           newSettings: newSettings
@@ -188,7 +178,6 @@ function ObjectDetectionSettings({
       }
     
     const handleSubmit = async(newSettings) => {
-        console.log("Submitted object detection settings")
         return await submitSettingsUpdateRequest(newSettings);
     };
 
@@ -239,17 +228,16 @@ function ObjectDetectionSettings({
             
         <div className="hapticFeedbackToggle-container">
             <div className="text-container">
-            <p>{settings.isHapticOn ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
+            <p className='setting-subtitle'>{settings.isHapticOn ? 'Haptic feedback is enabled' : 'Haptic feedback is disabled'}</p>
             </div>
             <label className="switch">
             <input type="checkbox" checked={settings.isHapticOn} onChange={handlehapticFeedbackToggle} />
             <span className="slider"></span>
             </label>
         </div>
-        <button onClick={async() => {
+        <button className='see-button' onClick={async() => {
             await handleSubmit(settings)
                 .then(res => {
-                  console.log("sucessfully submited and updated settings");
                   setAllLocalStorageSettings(settings);
               })
                 .catch(err => {console.log("Could not submit and update settings")});

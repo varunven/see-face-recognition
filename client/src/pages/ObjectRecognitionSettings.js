@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
-import { SeeRequest, sendSeeRequest } from './utils/seeRequest';
-import { recognizableObjects } from './constants/recognizableObjects';
+import { sendSeeRequest } from '../utils/seeRequest';
+import { recognizableObjects } from '../constants/recognizableObjects';
+import "./ObjectRecognitionSettings.css";
 
+// Learned the Object Recognition Settings Page
 function ObjectRecognitionSettings({
   socket,
   onSettingsChange,
@@ -24,7 +26,7 @@ function ObjectRecognitionSettings({
 
   useEffect(() => {
     if (learnedFaceEvent) {
-      navigate('/change-faces');
+      navigate('/learned-faces');
     }
   }, [learnedFaceEvent]);
 
@@ -46,10 +48,7 @@ function ObjectRecognitionSettings({
 
     const updateSettings = async() => {
       window.history.replaceState({}, document.title)
-      console.log("receiving new settings via voice commands");
-      console.log(newVoiceSettings);
       onVoiceCommandError("");
-      console.log("Sending settings to pi");
       const {volumeControl = null, isAudioOn = null, voiceGender = null, object = null, newPriority = null, audioPlaybackTime = null} = newVoiceSettings ?? {};
       let newPrios = [];
       if (object) {
@@ -66,8 +65,6 @@ function ObjectRecognitionSettings({
         audioPlaybackTime: audioPlaybackTime ? audioPlaybackTime : settings.audioPlaybackTime
       }
     
-      console.log(`new setings`);
-      console.log(newSettings);
       // submit request to rasp pi first, and only update u.i on successfully changing settings
       await submitSettingsUpdateRequest(newSettings).then(res => {
           console.log("received response");
@@ -132,19 +129,6 @@ function ObjectRecognitionSettings({
     localStorage.setItem('rowStates', JSON.stringify(newRowStates));
   };
 
-  function getMapOfStates(rowStates){
-    const my_map = new Map()
-    for (let i = 0; i < recognizableObjects.length; i++) {
-      if (rowStates[i]) {
-        my_map[recognizableObjects[i]] = rowStates[i]
-      }
-      else {
-        my_map[recognizableObjects[i]] = 0 // default priority?
-      }
-    }
-    return my_map
-  }
-
   const handleAudioPlayBack = (event) => {
     const value = event.target.value;
     setSettings(prevSettings => ({
@@ -190,12 +174,12 @@ function ObjectRecognitionSettings({
           value={settings.volumeControl}
           onChange={handleVolumeControl}
         />
-        <span>{settings.VolumeControl}</span>
+        <span>{settings.volumeControl}</span>
     </div>
 
       <div className="objectRecognitionAudioToggled-container">
       <div className="text-container">
-        <p>{settings.isAudioOn ? 'Object recognition audio is enabled' : 'Object recognition audio is disabled'}</p>
+        <p className='setting-subtitle'>{settings.isAudioOn ? 'Object recognition audio is enabled' : 'Object recognition audio is disabled'}</p>
       </div>
       <label className="switch">
         <input type="checkbox" checked={settings.isAudioOn} onChange={handleobjectRecognitionAudioToggled} />
@@ -203,24 +187,8 @@ function ObjectRecognitionSettings({
       </label>
     </div>
           
-    <div>
-        <p>Current Audio Voice: {settings.voiceGender}</p>
-      <div className="switch-container">
-        <div
-          className={`option ${settings.voiceGender === 'Male' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Male')}>
-          Male Voice
-        </div>
-        <div
-          className={`option ${settings.voiceGender === 'Female' ? 'active' : ''}`}
-          onClick={() => handleVoiceGenderSelect('Female')}>
-          Female Voice
-        </div>
-      </div>
-    </div>
-          
     <div className="ObjectRecognitionMenu">
-        <button onClick={toggleObjectRecognitionMenu}>Objects to Recognize</button>
+        <button className="see-button" onClick={toggleObjectRecognitionMenu}>Objects to Recognize</button>
         {menuOpen && (
         <div className="popup-container">
             <div className="menu-content">
@@ -247,13 +215,14 @@ function ObjectRecognitionSettings({
           <input type="number" value={settings.audioPlaybackTime} onChange={handleAudioPlayBack} />
         </label>
       </div>
-      <button onClick={async() => {
+      <button className="see-button"onClick={async() => {
         await submitSettingsUpdateRequest(settings)
           .then(res => {setAllLocalStorageSettings(settings)})
           .catch(err => console.log(err));
 
 
-        }}>Submit</button>
+        }}>Submit
+        </button>
     </div>
   );
 }

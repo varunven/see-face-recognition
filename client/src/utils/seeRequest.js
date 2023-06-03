@@ -2,13 +2,6 @@
 
 export const sendSeeRequest = (socket, data) => {
     return new Promise((resolve, reject) => {
-
-        // request fails if no response within 5 seconds
-        // const id = setTimeout(() => {
-        //     console.log("req timed out");
-        //     reject("Request timed out.")
-        // }, 5000);
-
         socket.timeout(5000).emit("see-request", data, (err, response_code) => {
             console.log(response_code);
             if (err) {
@@ -31,7 +24,6 @@ export const sendYoloRequest = (socket) => {
   return new Promise((resolve, reject) => {
 
       socket.timeout(7000).emit("yolo-request", (err, files, response_code) => {
-          console.log(response_code);
           if (err) {
               reject("Request timed out");
           }

@@ -1,3 +1,4 @@
+// List of recognizable objects via YOLO
 export const recognizableObjects = 
 ["person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
  "traffic light", "fire hydrant", "street sign", "stop sign", "parking meter", "bench",
@@ -26,5 +27,4 @@ export const wordToNum = {
     "eight": 8,
     "nine": 9,
     "ten": 10
-    // continue with more numbers if necessary
 }
